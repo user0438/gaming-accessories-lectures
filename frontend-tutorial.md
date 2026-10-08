@@ -372,8 +372,8 @@ Arbeite in dieser Reihenfolge. Die Code- und Dateiänderungen pro Issue werden i
 | 3 | `SETUP-01` | Vite-React-Frontend startet; Logo liegt in Frontend-`public` und `src/assets` | `frontend/index.html`, `frontend/public/logo.png`, `frontend/src/assets/logo.png`, Vite-Dateien |
 | 4 | `STYLE-01` | vorgegebenes Styling eingebunden und Stylingansatz verstanden | `assets/index.css` → `frontend/src/index.css` |
 | 5 | `UX-01` | vorgegebenes Wireframe ausgewertet | keine neue Wireframe-Datei |
-| 6 | `UI-01` | statische Produktübersicht mit wiederverwendbaren Komponenten | `src/App.jsx`, `src/components/`, `src/components/UI/` |
-| 7 | `API-02` | API-Hook, Produktladen, Loading/Error, Bilder und Preise | `src/hooks/`, `src/util/`, `src/components/Error.jsx` |
+| 6 | `UI-01` | statische Produktübersicht mit wiederverwendbaren Komponenten | `src/App.jsx`, `src/Header.jsx`, `src/components/UI/Button.jsx`, `src/components/AccessoryItem.jsx`, `src/components/Accessories.jsx` |
+| 7 | `API-02` | API-Hook, Produktladen, Loading/Error, Bilder und Preise | `src/hooks/`, `src/utils/`, `src/components/Error.jsx` |
 | 8 | `CART-01` | Context/Reducer und Warenkorbpositionen | `src/store/CartContext.jsx`, `Cart.jsx`, `CartItem.jsx` |
 | 9 | `CART-02` | Dialogzustand und native modale Dialoge | `src/store/UserProgressContext.jsx`, `src/components/UI/Modal.jsx`, `index.html` |
 | 10 | `ORDER-01` | Checkout-Formular sendet Bestellung | `src/components/Checkout.jsx`, `src/components/UI/Input.jsx` |
@@ -498,9 +498,12 @@ Prüfe, dass beide Dateien existieren. Dateien in Vites `public`-Ordner werden u
 <link rel="icon" type="image/png" href="/logo.png" />
 ```
 
-Dateien unter `src/assets` durchlaufen dagegen Vites Modul- und Build-Pipeline. Importiere das Logo dort, wo du es als Bild anzeigen willst, und verwende den Importwert als `src`:
+Erstelle die Header-Komponente in `src/components/Header.jsx`, die das Logo anzeigt.
+
+Dateien unter `src/assets` durchlaufen dagegen Vites Modul- und Build-Pipeline. Importiere das Logo in der Header-Komponente und verwende den Importwert als `src`:
 
 ```jsx
+
 import logoImg from '../assets/logo.png';
 
 <img src={logoImg} alt="Gaming Accessoires" />
@@ -652,9 +655,72 @@ createRoot(document.getElementById('root')).render(
 
 ### 4.2 `App` und erste Produktkarte
 
-Erstelle `src/App.jsx`. Am Anfang genügt es, eine Überschrift und eine einzelne statische Produktkarte anzuzeigen. Lege danach die Karte als eigene Komponente unter `src/components/AccessoryItem.jsx` ab. Übergib das Produkt als Prop `accessory`; schreibe Produktdaten nicht mehrfach fest in das JSX.
+Erstelle `src/App.jsx`, `src/Header.jsx` und `src/components/UI/Button.jsx`. Ein Button ist eine wiederverwendbare Komponente, die du für „In den Warenkorb“ und andere Aktionen verwenden kannst. Sie erhält die Props `children`, `textOnly` und `className`. `textOnly` steuert, ob der Button wie ein Link aussieht. `className` erlaubt zusätzliche CSS-Klassen. Alle weiteren Props werden an das `<button>`-Element weitergereicht:
 
-Die Karte kann vorübergehend ein Objekt mit denselben Feldern wie ein API-Produkt erhalten. Baue in `AccessoryItem` die sichtbaren Daten schrittweise ein:
+```jsx
+function Button({
+  children,
+  textOnly = false,
+  className = '',
+  ...props
+}) {
+  const variantClass = textOnly ? 'text-button' : 'button';
+  const classes = [variantClass, className].filter(Boolean).join(' ');
+
+  return (
+    <button className={classes} {...props}>
+      {children}
+    </button>
+  );
+}
+
+export default Button;
+```
+
+Die Weiterreichung von Props mit `...props` ist ein übliches Muster (REST-Pattern), um zusätzliche Attribute wie `onClick` oder `disabled` an das native Element mit `{...props}` weiterzugeben.
+
+Der Button wird im Header sowie das Logo importiert und angezeigt. Die Header-Komponente ist die erste sichtbare Komponente von `App.jsx`. Sie enthält das Logo, den Seitentitel und eine Schaltfläche für den Warenkorb:
+
+```jsx
+import logoImg from '../assets/logo.png';
+import Button from './UI/Button';
+
+function Header() {
+    return (
+        <header id="main-header">
+          <div id="title">
+              <img src={logoImg} alt="Gaming Accessoires" />
+              <h1>Gaming Accessoires</h1>
+          </div>
+          <nav aria-label="Hauptnavigation">
+              <Button type="button" textOnly disabled>
+                Warenkorb (0)
+              </Button>
+          </nav>
+        </header>
+    );
+}
+
+export default Header;
+```
+
+Abschliessend wird die Header-Komponente in `App.jsx` eingebunden:
+
+```jsx
+import Header from './Header.jsx';
+
+function App() {
+  return (
+    <>
+      <Header />
+    </>
+  )
+}
+```
+
+Nach dem Header kommen wir zu den Produkten. Dazu legst du zwei weitere Komponenten an: eine für die Liste der Produkte `src/components/Accessories.jsx` und eine für jedes einzelne Produkt `src/components/AccessoryItem.jsx`.
+
+Zuerst kümmern wir uns um die Anzeige eines einzelnen Produkte in Form einer Produktkarte. Die Komponente `src/components/AccessoryItem.jsx` bekommte ein Produkt als Prop `accessory` übergeben, damit die Produktdaten nicht mehrfach fest in das JSX geschrieben werden müssen. Ein Produkt erhält wie in der Backend-Schnittstelle ersichtlich Name, Beschreibung, Preis, Bild und später eine Schaltfläche zum Hinzufügen zum Warenkorb. Für das Bild soll ein aussagekräftiger `alt`-Text, zum Beispiel der Produktname, verwendet werden. Baue in `AccessoryItem` die sichtbaren Daten wie folgt ein:
 
 ```jsx
 function AccessoryItem({ accessory }) {
@@ -663,7 +729,7 @@ function AccessoryItem({ accessory }) {
       <article>
         <img src={accessory.image} alt={accessory.name} />
         <h3>{accessory.name}</h3>
-        <p>{accessory.description}</p>
+        <p className="accessory-item-description">{accessory.description}</p>
         <p>{accessory.price}</p>
       </article>
     </li>
@@ -673,19 +739,52 @@ function AccessoryItem({ accessory }) {
 export default AccessoryItem;
 ```
 
-Die Karte soll semantisch in einer Liste verwendet werden:
+Die Karte soll semantisch in einer Liste verwendet werden, aber wir verwenden zuerst ein Mock-Objekt in der `Accessories`-Komponente, um die Props zu testen. Später ersetzt du die statischen Daten durch die API-Antwort:
 
 ```jsx
-<ul id="accessories">
-  <AccessoryItem accessory={accessory} />
-</ul>
+import AccessoryItem from "./components/AccessoryItem";
+
+function Accessories() {
+  const accessory = {
+    name: "Gaming Mouse",
+    description: "A high-precision gaming mouse with customizable buttons.",
+    price: "$49.99",
+    image: "/images/gaming-mouse.jpg"
+  };
+  
+  return (
+    <ul id="accessories">
+      <AccessoryItem accessory={accessory} />
+    </ul>
+  )
+}
+
+export default Accessories
 ```
 
-Eine Karte erhält später beispielsweise Name, Beschreibung, Preis, Bild und eine Schaltfläche zum Hinzufügen. Verwende für das Bild einen aussagekräftigen `alt`-Text, zum Beispiel den Produktnamen.
+Zum Testen müssen wir noch die Accessories-Komponente in `App.jsx` einbinden:
+
+```jsx
+import Accessories from "./components/Accessories";
+import Header from "./components/Header";
+
+function App() {
+  return (
+    <>
+      <Header />
+      <main>
+        <Accessories />
+      </main>
+    </>
+  )
+}
+
+export default App;
+```
 
 ### 4.3 Wiederholungen mit `map` anzeigen
 
-Wenn du ein Array mit Produkten hast, rendere es mit `map`. Jedes Element bekommt einen stabilen `key`, hier die Produkt-ID:
+Von der API erhältst du aber ein Array mit Produkten, rendere somit in der Accessories-Komponente die Produkte mit `map`. Jedes Element bekommt einen stabilen `key`, hier die Produkt-ID:
 
 ```jsx
 {accessories.map((accessory) => (
@@ -693,9 +792,47 @@ Wenn du ein Array mit Produkten hast, rendere es mit `map`. Jedes Element bekomm
 ))}
 ```
 
-Die API verwendet Text-IDs wie `"g1"`. Verwende genau diese ID und keinen Array-Index als `key`.
+Beachte die Mock-Daten entsprechend anzupassen. Die API verwendet Text-IDs wie `"g1"`. Verwende genau diese ID und keinen Array-Index als `key`.
 
-**Checkpoint:** Die Komponenten sind getrennt und können mehrere unterschiedliche Produktdaten darstellen. Die Produktdaten dürfen für diesen kurzen Zwischenschritt noch lokal sein; im nächsten Abschnitt ersetzt du sie durch die API-Antwort.
+**Checkpoint:** Die Komponenten sind getrennt und können mehrere unterschiedliche Produktdaten darstellen. Die Produktdaten sollen für diesen kurzen Zwischenschritt noch lokal sein; im nächsten Abschnitt ersetzt du sie durch die API-Antwort.
+
+Die App-Komponente soll final den Header und die Produktliste rendern. Die Produktliste nutzt die `<ul>`-Element und erzeugt für jedes Produkt eine Produktkarte. Die `<li>`-Elemente werden von `AccessoryItem` erzeugt.
+
+```jsx
+import AccessoryItem from "./components/AccessoryItem";
+
+function Accessories() {
+  const accessories = [
+    {
+      id: "g1",
+      name: "Gaming Mouse",
+      description: "A high-precision gaming mouse with customizable buttons.",
+      price: "$ 49.99",
+      image: "http://localhost:3000/images/gaming-mouse.png"
+    },
+    {
+      id: "g2",
+      name: "Mechanical Keyboard",
+      description: "A mechanical keyboard with RGB lighting and tactile switches.",
+      price: "$ 89.99",
+      image: "http://localhost:3000/images/mechanical-keyboard.png"
+    }];
+
+  return (
+    <>
+      <ul id="accessories">
+        {accessories.map((accessory) => (
+          <AccessoryItem key={accessory.id} accessory={accessory} />
+        ))}
+      </ul>
+    </>
+  )
+}
+
+export default Accessories
+```
+
+**Beachte**: Die Bilder werden vom Backend geladen. Folglich muss das Backend laufen, damit die Bilder angezeigt werden.
 
 **Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 5 „Inhalte von Listen mit `map` übergeben“ und „Conditional Rendering“.
 
@@ -703,83 +840,87 @@ Die API verwendet Text-IDs wie `"g1"`. Verwende genau diese ID und keinen Array-
 
 ### 5.1 `Accessories` erstellen
 
-Setze diese Anforderung im Code im Issue `API-02` um; die vollständigen Dateien stehen in Abschnitt 12.7. Das folgende Effect-Muster erklärt zunächst das Prinzip des Ladens mit `useEffect`. Den daraus abgeleiteten, wiederverwendbaren Hook `useHttp` baust und erklärst du gemeinsam mit dem zweiten HTTP-Request – dem Absenden der Bestellung – in Abschnitt 8.2 und 8.3; anschließend verwendet auch `Accessories` diesen Hook, wie in Abschnitt 12.7 vollständig gezeigt.
+Setze diese Anforderung im Code im Issue `API-02` um; die vollständigen Dateien stehen in Abschnitt 12.7. Das folgende Effect-Muster erklärt zunächst das Prinzip des Ladens mit `useEffect`. Den daraus abgeleiteten, wiederverwendbaren Hook `useHttp` baust du gemeinsam mit dem zweiten HTTP-Request – dem Absenden der Bestellung – in Abschnitt 8.2 und 8.3; anschließend verwendet auch `Accessories` diesen Hook, wie in Abschnitt 12.7 vollständig gezeigt.
 
-Erstelle `src/components/Accessories.jsx`. Die Komponente lädt beim ersten Anzeigen die Daten von `http://localhost:3000/accessories`. Verwende drei State-Werte:
+Passe die Produktliste `src/components/Accessories.jsx` derart an, dass die Produkte beim ersten Anzeigen vom Backend `http://localhost:3000/accessories` über useEffect geladen werden. Verwende zudem drei State-Werte:
 
 - `loadedAccessories`: geladene Produkte,
 - `isLoading`: zeigt, ob der Request läuft,
 - `error`: enthält eine verständliche Fehlermeldung oder keinen Fehler.
 
-Der Request soll auf `response.ok` prüfen. `fetch` wirft nicht automatisch einen Fehler, wenn der Server mit Status `404` oder `500` antwortet. Prüfe daher den Status, bevor du die Daten als erfolgreich behandelst.
+Der Request prüft zuerst auf `response.ok`. `fetch` wirft nicht automatisch einen Fehler, wenn der Server mit Status `404` oder `500` antwortet. Daher muss der Status geprüft werden, bevor die Daten in den State geschrieben werden.
 
-Beispiel für den Ablauf im Effect:
-
-```jsx
-useEffect(() => {
-  const controller = new AbortController();
-
-  async function loadAccessories() {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('http://localhost:3000/accessories', {
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Produkte konnten nicht geladen werden (HTTP ${response.status}).`);
-      }
-
-      const data = await response.json();
-      setLoadedAccessories(data);
-    } catch (requestError) {
-      if (requestError.name !== 'AbortError') {
-        setError(requestError.message || 'Unbekannter Fehler beim Laden.');
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setIsLoading(false);
-      }
-    }
-  }
-
-  loadAccessories();
-  return () => controller.abort();
-}, []);
-```
-
-Importiere `useEffect` und `useState` aus React. Die folgenden vollständigen Ausschnitte zeigen, wie die State-Werte vorbereitet und die drei Zustände gerendert werden. Ergänze sie mit dem Effect aus dem vorherigen Beispiel:
+Beachte auch `useEffect` und `useState` aus React zu importieren. Die folgenden vollständigen Ausschnitte zeigen, wie die State-Werte vorbereitet und die drei Zustände gerendert werden. Folgend die Anpassungen in `src/components/Accessories.jsx`:
 
 ```jsx
-const [loadedAccessories, setLoadedAccessories] = useState([]);
-const [isLoading, setIsLoading] = useState(true);
-const [error, setError] = useState('');
+import { useEffect, useState } from 'react';
+import AccessoryItem from './AccessoryItem';
 
-if (isLoading) return <p className="center">Produkte werden geladen …</p>;
-if (error) return <p className="error" role="alert">{error}</p>;
+function Accessories() {
+    const [loadedAccessories, setLoadedAccessories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-return (
-  <ul id="accessories">
-    {loadedAccessories.map((accessory) => (
-      <AccessoryItem key={accessory.id} accessory={accessory} />
-    ))}
-  </ul>
-);
+    useEffect(() => {
+        const controller = new AbortController();
+
+        async function loadAccessories() {
+            setIsLoading(true);
+            setError('');
+
+            try {
+              const response = await fetch('http://localhost:3000/accessories', {
+                  signal: controller.signal,
+              });
+
+              if (!response.ok) {
+                  throw new Error(`Produkte konnten nicht geladen werden (HTTP ${response.status}).`);
+              }
+
+              const data = await response.json();
+              setLoadedAccessories(data);
+            } catch (requestError) {
+              if (requestError.name !== 'AbortError') {
+                  setError(requestError.message || 'Unbekannter Fehler beim Laden.');
+              }
+            } finally {
+              if (!controller.signal.aborted) {
+                  setIsLoading(false);
+              }
+            }
+        }
+
+        loadAccessories();
+
+        return () => controller.abort();
+    }, []);
+
+    if (isLoading) return <p className="center">Produkte werden geladen ...</p>;
+    if (error) return <p className="error" role="alert">{error}</p>;
+
+    return (
+        <>
+            <ul id="accessories">
+                {loadedAccessories.map((accessory) => (
+                    <AccessoryItem key={accessory.id} accessory={accessory} />
+                ))}
+            </ul>
+       </>
+    );
+}
+
+export default Accessories;
 ```
-
-Erzeuge die Produktliste erst, wenn Daten geladen sind. Damit rufst du `map` nicht auf einem noch fehlenden Wert auf.
 
 ### 5.2 Bilder und Preise korrekt darstellen
 
-In `AccessoryItem` ist `accessory.image` ein relativer Pfad, zum Beispiel `images/gaming-mouse.png`. Die Bild-URL lautet:
+In `AccessoryItem` ist `accessory.image` ein relativer Pfad, zum Beispiel `images/gaming-mouse.png`. Da die Bilder vom Backend geladen werden, muss die Bild-URL mit dem Basis-URL des Backends in `AccessoryItem` kombiniert werden.
 
 ```jsx
 const imageUrl = `http://localhost:3000/${accessory.image}`;
 ```
 
-Die Preiswerte kommen in der vorhandenen Beispieldatei als Zeichenketten. Wandle sie vor der Formatierung in eine Zahl um. Erstelle `src/util/formatting.js`:
+Die Preiswerte kommen in der vorhandenen Beispieldatei als Zeichenketten. Wandle sie vor der Formatierung in eine Zahl um. Erstelle `src/utils/formatting.js`:
 
 ```js
 export const currencyFormatter = new Intl.NumberFormat('de-AT', {
@@ -796,7 +937,7 @@ export function formatPrice(value) {
 }
 ```
 
-Verwende `formatPrice(accessory.price)` für Produkt- und Warenkorbpreise. Summen berechnest du ebenfalls mit `Number(item.price) * item.quantity`.
+Verwende `formatPrice(accessory.price)` für den Produktpreis in `AccessoryItem`.
 
 **Zusätzliche Theorie – HTTP-Fehler und Abbruch von Requests:** `fetch` unterscheidet zwischen einem Netzwerkfehler und einer HTTP-Fehlerantwort. Ein Netzwerkfehler (zum Beispiel ein nicht gestartetes Backend) führt in den `catch`-Zweig; ein HTTP-Status wie `404` führt zunächst trotzdem zu einer normalen `Response`. `response.ok` ist nur bei erfolgreichen Statuscodes wahr. Ein `AbortController` kann einen noch laufenden Request abbrechen, wenn die Component nicht mehr benötigt wird. `AbortError` ist in diesem Fall erwartbar und soll nicht als Ladefehler angezeigt werden.
 
@@ -1860,7 +2001,7 @@ frontend/src/
 │   └── UI/Button.jsx
 ├── hooks/
 │   └── useHttp.js            (neu)
-└── util/
+└── utils/
     └── formatting.js         (neu)
 ```
 
@@ -1971,7 +2112,7 @@ export default function useHttp(url, config, initialData) {
 
 **Zusätzliche Theorie – Custom Hooks:** `useHttp` bündelt Fetching-, Lade- und Fehlerlogik für `Accessories` und später für `Checkout`. Die ausführliche Erklärung des Hooks, seiner Rückgabewerte und des `AbortController`-basierten Request-Lebenszyklus steht in Abschnitt 8.2 und 8.3, wo der Hook gemeinsam mit dem zweiten HTTP-Request eingeführt wird.
 
-**`frontend/src/util/formatting.js` – vollständiger Inhalt**
+**`frontend/src/utils/formatting.js` – vollständiger Inhalt**
 
 ```js
 export const currencyFormatter = new Intl.NumberFormat('de-AT', {
@@ -2042,7 +2183,7 @@ export default function Accessories() {
 
 ```jsx
 import Button from './UI/Button.jsx';
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 
 export default function AccessoryItem({ accessory }) {
   const price = Number(accessory.price);
@@ -2103,7 +2244,7 @@ frontend/src/
 ├── hooks/useHttp.js
 ├── store/
 │   └── CartContext.jsx        (neu)
-└── util/formatting.js
+└── utils/formatting.js
 ```
 
 **`frontend/src/store/CartContext.jsx` – vollständiger Inhalt**
@@ -2241,7 +2382,7 @@ export default function Header() {
 
 ```jsx
 import { useCart } from '../store/CartContext.jsx';
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 import Button from './UI/Button.jsx';
 
 export default function AccessoryItem({ accessory }) {
@@ -2280,7 +2421,7 @@ export default function AccessoryItem({ accessory }) {
 **`frontend/src/components/CartItem.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 import Button from './UI/Button.jsx';
 
 export default function CartItem({ item, onIncrease, onDecrease }) {
@@ -2316,7 +2457,7 @@ export default function CartItem({ item, onIncrease, onDecrease }) {
 
 ```jsx
 import { useCart } from '../store/CartContext.jsx';
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 import CartItem from './CartItem.jsx';
 
 export default function Cart() {
@@ -2541,7 +2682,7 @@ export default function Header() {
 ```jsx
 import { useCart } from '../store/CartContext.jsx';
 import { useUserProgress } from '../store/UserProgressContext.jsx';
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 import Button from './UI/Button.jsx';
 import CartItem from './CartItem.jsx';
 import Modal from './UI/Modal.jsx';
@@ -2654,7 +2795,7 @@ import Button from './UI/Button.jsx';
 import Error from './Error.jsx';
 import { useCart } from '../store/CartContext.jsx';
 import { useUserProgress } from '../store/UserProgressContext.jsx';
-import { currencyFormatter } from '../util/formatting.js';
+import { currencyFormatter } from '../utils/formatting.js';
 import useHttp from '../hooks/useHttp.js';
 
 const requestConfig = {
@@ -2802,7 +2943,7 @@ frontend/src/
 ├── store/
 │   ├── CartContext.jsx
 │   └── UserProgressContext.jsx
-└── util/formatting.js
+└── utils/formatting.js
 ```
 
 Commit: `feat: submit customer orders (ORDER-01)`.
@@ -2882,7 +3023,7 @@ repository/
 │       ├── store/
 │       │   ├── CartContext.jsx
 │       │   └── UserProgressContext.jsx
-│       └── util/
+│       └── utils/
 │           └── formatting.js
 ├── frontend-tutorial.md
 └── Readme.md
