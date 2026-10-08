@@ -1,0 +1,86 @@
+[
+  {
+    "id": "g1",
+    "name": "RGB Gaming Mouse",
+    "price": "49.99",
+    "description": "High-precision gaming mouse with customizable RGB lighting and 8 programmable buttons.",
+    "image": "images/gaming-mouse.png"
+  },
+  {
+    "id": "g2",
+    "name": "Mechanical Keyboard",
+    "price": "89.99",
+    "description": "Mechanical keyboard with blue switches, RGB backlight, and detachable wrist rest.",
+    "image": "images/mechanical-keyboard.png"
+  },
+  {
+    "id": "g3",
+    "name": "Gaming Headset",
+    "price": "69.99",
+    "description": "Surround sound headset with noise-cancelling mic and comfortable ear cushions.",
+    "image": "images/gaming-headset.png"
+  },
+  {
+    "id": "g4",
+    "name": "4K Gaming Monitor",
+    "price": "299.99",
+    "description": "27-inch 4K UHD monitor with 144Hz refresh rate and 1ms response time.",
+    "image": "images/gaming-monitor.png"
+  },
+  {
+    "id": "g5",
+    "name": "Ergonomic Gaming Chair",
+    "price": "199.99",
+    "description": "Adjustable gaming chair with lumbar support and headrest pillow.",
+    "image": "images/gaming-chair.png"
+  },
+  {
+    "id": "g6",
+    "name": "Extended Mouse Pad",
+    "price": "19.99",
+    "description": "Large mouse pad with stitched edges and anti-slip rubber base.",
+    "image": "images/mouse-pad.png"
+  },
+  {
+    "id": "g7",
+    "name": "USB Microphone",
+    "price": "59.99",
+    "description": "Studio-quality USB microphone for streaming and voice chat.",
+    "image": "images/usb-microphone.png"
+  },
+  {
+    "id": "g8",
+    "name": "Gaming Controller",
+    "price": "54.99",
+    "description": "Wireless controller compatible with PC and consoles.",
+    "image": "images/gaming-controller.png"
+  },
+  {
+    "id": "g9",
+    "name": "VR Headset",
+    "price": "399.99",
+    "description": "Immersive VR headset with motion controllers.",
+    "image": "images/vr-headset.png"
+  },
+  {
+    "id": "g10",
+    "name": "Webcam 1080p",
+    "price": "39.99",
+    "description": "Full HD webcam with built-in microphone for streaming.",
+    "image": "images/webcam.png"
+  },
+  {
+    "id": "g11",
+    "name": "Gaming Desk",
+    "price": "149.99",
+    "description": "Spacious desk with cable management and RGB lighting.",
+    "image": "images/gaming-desk.png"
+  },
+  {
+    "id": "g12",
+    "name": "Gaming Speakers",
+    "price": "79.99",
+    "description": "2.1 speaker system with subwoofer and RGB effects.",
+    "image": "images/gaming-speakers.png"
+  }
+]
