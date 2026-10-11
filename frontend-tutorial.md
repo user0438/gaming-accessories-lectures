@@ -373,10 +373,10 @@ Arbeite in dieser Reihenfolge. Die Code- und Dateiänderungen pro Issue werden i
 | 4 | `STYLE-01` | vorgegebenes Styling eingebunden und Stylingansatz verstanden | `assets/index.css` → `frontend/src/index.css` |
 | 5 | `UX-01` | vorgegebenes Wireframe ausgewertet | keine neue Wireframe-Datei |
 | 6 | `UI-01` | statische Produktübersicht mit wiederverwendbaren Komponenten | `src/App.jsx`, `src/Header.jsx`, `src/components/UI/Button.jsx`, `src/components/AccessoryItem.jsx`, `src/components/Accessories.jsx` |
-| 7 | `API-02` | API-Hook, Produktladen, Loading/Error, Bilder und Preise | `src/hooks/`, `src/utils/`, `src/components/Error.jsx` |
-| 8 | `CART-01` | Context/Reducer und Warenkorbpositionen | `src/store/CartContext.jsx`, `Cart.jsx`, `CartItem.jsx` |
-| 9 | `CART-02` | Dialogzustand und native modale Dialoge | `src/store/UserProgressContext.jsx`, `src/components/UI/Modal.jsx`, `index.html` |
-| 10 | `ORDER-01` | Checkout-Formular sendet Bestellung | `src/components/Checkout.jsx`, `src/components/UI/Input.jsx` |
+| 7 | `API-02` | API-Hook, Produktladen, Loading/Error, Bilder und Preise | `src/utils/` |
+| 8 | `CART-01` | Context/Reducer und Warenkorbpositionen | `src/store/CartContext.jsx`, `Cart.jsx`, `CartItem.jsx`, `src/components/UI/Modal.jsx`, |
+| 9 | `CART-02` | Dialogzustand und native modale Dialoge | `src/store/UserProgressContext.jsx`,  |
+| 10 | `ORDER-01` | Checkout-Formular sendet Bestellung | `src/hooks/`, `src/components/Error.jsx`, `src/components/Checkout.jsx`, `src/components/UI/Input.jsx` |
 | 11 | `QA-01` | Prüfergebnisse, Lint und Build dokumentiert | `docs/test-report.md` |
 
 `PLAN-01` und `UX-01` ändern keine Projektdateien und benötigen daher keinen künstlichen Commit. Bei `UX-01` werden die Erkenntnisse direkt im GitHub-Issue festgehalten.
@@ -655,7 +655,7 @@ createRoot(document.getElementById('root')).render(
 
 ### 4.2 `App` und erste Produktkarte
 
-Erstelle `src/App.jsx`, `src/Header.jsx` und `src/components/UI/Button.jsx`. Ein Button ist eine wiederverwendbare Komponente, die du für „In den Warenkorb“ und andere Aktionen verwenden kannst. Sie erhält die Props `children`, `textOnly` und `className`. `textOnly` steuert, ob der Button wie ein Link aussieht. `className` erlaubt zusätzliche CSS-Klassen. Alle weiteren Props werden an das `<button>`-Element weitergereicht:
+Erstelle `src/App.jsx`, `src/components/Header.jsx` und `src/components/UI/Button.jsx`. Ein Button ist eine wiederverwendbare Komponente, die du für „In den Warenkorb“ und andere Aktionen verwenden kannst. Sie erhält die Props `children`, `textOnly` und `className`. `textOnly` steuert, ob der Button wie ein Link aussieht. `className` erlaubt zusätzliche CSS-Klassen. Alle weiteren Props werden an das `<button>`-Element weitergereicht:
 
 ```jsx
 function Button({
@@ -707,7 +707,7 @@ export default Header;
 Abschliessend wird die Header-Komponente in `App.jsx` eingebunden:
 
 ```jsx
-import Header from './Header.jsx';
+import Header from './components/Header.jsx';
 
 function App() {
   return (
@@ -742,7 +742,7 @@ export default AccessoryItem;
 Die Karte soll semantisch in einer Liste verwendet werden, aber wir verwenden zuerst ein Mock-Objekt in der `Accessories`-Komponente, um die Props zu testen. Später ersetzt du die statischen Daten durch die API-Antwort:
 
 ```jsx
-import AccessoryItem from "./components/AccessoryItem";
+import AccessoryItem from "./AccessoryItem";
 
 function Accessories() {
   const accessory = {
@@ -799,7 +799,7 @@ Beachte die Mock-Daten entsprechend anzupassen. Die API verwendet Text-IDs wie `
 Die App-Komponente soll final den Header und die Produktliste rendern. Die Produktliste nutzt die `<ul>`-Element und erzeugt für jedes Produkt eine Produktkarte. Die `<li>`-Elemente werden von `AccessoryItem` erzeugt.
 
 ```jsx
-import AccessoryItem from "./components/AccessoryItem";
+import AccessoryItem from "./AccessoryItem";
 
 function Accessories() {
   const accessories = [
@@ -807,14 +807,14 @@ function Accessories() {
       id: "g1",
       name: "Gaming Mouse",
       description: "A high-precision gaming mouse with customizable buttons.",
-      price: "$ 49.99",
+      price: "€ 49.99",
       image: "http://localhost:3000/images/gaming-mouse.png"
     },
     {
       id: "g2",
       name: "Mechanical Keyboard",
       description: "A mechanical keyboard with RGB lighting and tactile switches.",
-      price: "$ 89.99",
+      price: "€ 89.99",
       image: "http://localhost:3000/images/mechanical-keyboard.png"
     }];
 
@@ -874,7 +874,7 @@ function Accessories() {
               });
 
               if (!response.ok) {
-                  throw new Error(`Produkte konnten nicht geladen werden (HTTP ${response.status}).`);
+                  throw new Error(`Produkte konnten nicht geladen werden (HTTP ${response.status} Error: ${response.statusText}).`);
               }
 
               const data = await response.json();
@@ -937,7 +937,7 @@ export function formatPrice(value) {
 }
 ```
 
-Verwende `formatPrice(accessory.price)` für den Produktpreis in `AccessoryItem`.
+Verwende `formatPrice(accessory.price)` für den Produktpreis in `AccessoryItem` (siehe 12.7).
 
 **Zusätzliche Theorie – HTTP-Fehler und Abbruch von Requests:** `fetch` unterscheidet zwischen einem Netzwerkfehler und einer HTTP-Fehlerantwort. Ein Netzwerkfehler (zum Beispiel ein nicht gestartetes Backend) führt in den `catch`-Zweig; ein HTTP-Status wie `404` führt zunächst trotzdem zu einer normalen `Response`. `response.ok` ist nur bei erfolgreichen Statuscodes wahr. Ein `AbortController` kann einen noch laufenden Request abbrechen, wenn die Component nicht mehr benötigt wird. `AbortError` ist in diesem Fall erwartbar und soll nicht als Ladefehler angezeigt werden.
 
@@ -949,7 +949,7 @@ Verwende `formatPrice(accessory.price)` für den Produktpreis in `AccessoryItem`
 
 ## 6. Gemeinsamen Warenkorb-State anlegen
 
-Produktkarten, Kopfzeile, Warenkorb und Checkout benötigen dieselben Warenkorbdaten. Lege `src/store/CartContext.jsx` an und stelle darin Funktionen wie `addItem`, `removeItem` und `clearCart` bereit.
+Produktkarten, Kopfzeile, Warenkorb und Checkout benötigen dieselben Warenkorbdaten. Dafür nutzen wir einen Context und Reducer. Der Context stellt den State und die Aktionen bereit; der Reducer berechnet den nächsten State aus dem bisherigen State und einer Aktion.
 
 ### 6.1 Zusätzliche Theorie: Context und `useContext`
 
@@ -984,7 +984,30 @@ Die Aktion beschreibt **was** geschehen soll; der Reducer entscheidet **wie** da
 
 ### 6.3 Warenkorb-Context implementieren
 
-Verwende als Ausgangszustand `{ items: [] }`. Jede Position enthält die Produktdaten und `quantity`. Wenn das Produkt bereits im Warenkorb liegt, erhöhe die Menge, statt eine zweite Position anzulegen. Beim Verringern der Menge entfernst du die Position, sobald die Menge null wäre. Eine Aktion für eine nicht vorhandene ID soll den State unverändert zurückgeben.
+Erstelle zuerst einen Ordner `src/store/`, der alle Zustands- und Context-Dateien für den Shop sammelt. In diesem Ordner legst du `CartContext.jsx` an. Der Context soll den Warenkorb verwalten, Produkte hinzufügen, entfernen und leeren können und allen Komponenten im Shop zur Verfügung stehen.
+
+Die Komponente `CartContext.jsx` stellt final einen `CartContextProvider` für den Warenkorb zur Verfügung stellt. Am Beginn implementierst du den cartReducer. Im Reducer befindet sich die Logik für die Aktionen `ADD_ITEM`, `REMOVE_ITEM` und `CLEAR_CART`. Lege deshalb folgende Struktur an:
+
+```jsx
+function cartReducer(state, action) {
+  if (action.type === 'ADD_ITEM') {
+    return null; // ToDo
+  }
+
+  if (action.type === 'REMOVE_ITEM') {
+    return null;
+  }
+
+  if (action.type === 'CLEAR_CART') {
+    return null; // ToDo
+  }
+
+  return state;  // Fallback für unbekannte Aktionen
+}
+
+```
+
+Der Ausgangszustand des cartReducers wird ein Objekt mit den Warenkorb-Positionen sein, d.h. wir gehen von folgender Struktur aus:`{ items: [] }`. Jede Position enthält neben den Produktdaten die Menge `quantity`. Wenn das Produkt bereits im Warenkorb liegt, erhöhe die Menge, statt eine zweite Position anzulegen. Beim Verringern der Menge entfernst du die Position, sobald die Menge null wäre. Eine Aktion für eine nicht vorhandene ID soll den State unverändert zurückgeben.
 
 Baue den Reducer schrittweise:
 
@@ -999,20 +1022,20 @@ Für die `ADD_ITEM`-Aktion kannst du dieses unveränderliche Update-Muster verwe
 if (action.type === 'ADD_ITEM') {
   const existingItem = state.items.find((item) => item.id === action.item.id);
 
-  if (existingItem) {
+  if (existingItem) {  // Produkt bereits im Warenkorb
     return {
       ...state,
       items: state.items.map((item) =>
         item.id === action.item.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+          ? { ...item, quantity: item.quantity + 1 }          // Menge des Produkts erhöhen
+          : item                                              // unveränderte Positionen beibehalten
       ),
     };
   }
 
-  return {
+  return {          // Produkt noch nicht im Warenkorb
     ...state,
-    items: [...state.items, { ...action.item, quantity: 1 }],
+    items: [...state.items, { ...action.item, quantity: 1 }], // Produkt mit Menge 1 hinzufügen
   };
 }
 ```
@@ -1022,9 +1045,9 @@ Für `REMOVE_ITEM` prüfst du zuerst `find` auf die ID. Ist keine Position vorha
 ```jsx
 if (action.type === 'REMOVE_ITEM') {
   const existingItem = state.items.find((item) => item.id === action.id);
-  if (!existingItem) return state;
+  if (!existingItem) return state;    // Keine Position gefunden, unverändert zurückgeben
 
-  if (existingItem.quantity === 1) {
+  if (existingItem.quantity === 1) {  // Position entfernen
     return {
       ...state,
       items: state.items.filter((item) => item.id !== action.id),
@@ -1033,7 +1056,7 @@ if (action.type === 'REMOVE_ITEM') {
 
   return {
     ...state,
-    items: state.items.map((item) =>
+    items: state.items.map((item) =>  // Menge der passenden Position reduzieren
       item.id === action.id
         ? { ...item, quantity: item.quantity - 1 }
         : item
@@ -1050,18 +1073,24 @@ if (action.type === 'CLEAR_CART') {
 }
 ```
 
-Ergänze abschließend den Fallback für unbekannte Aktionen:
+Ergänze die Imports für `createContext`, `useContext` und `useReducer` und definiere `cartReducer` oberhalb des Providers. Lege anschließend den Context mit `createContext(null)` an.
 
-```jsx
-return state;
-```
+Der Provider `CartContextProvider` verwendet `useReducer` mit dem `cartReducer` und dem Ausgangszustand `{ items: [] }`. Er stellt den State und die Aktionen in einem Objekt `value` bereit. Die Aktionen rufen `dispatch` mit der passenden Aktion auf. Der Provider gibt `<CartContext.Provider value={value}>{children}</CartContext.Provider>` zurück.
 
-Lege anschließend den Context mit `createContext(null)` an. Exportiere `CartContextProvider` und einen Hook `useCart()`, der den Context mit `useContext` liest und einen Fehler wirft, falls der Provider fehlt. So wird eine falsch platzierte Komponente nicht stillschweigend als funktionierend behandelt.
+Der Hook `useCart()` liest den Context mit `useContext(CartContext)`. Wenn der Context `null` ist, wirft er einen Fehler. So wird eine falsch platzierte Komponente nicht stillschweigend als funktionierend behandelt.
+
+Exportiere `CartContextProvider` und den Hook `useCart()`.
 
 Die Grundform des Providers und des Custom Hooks ist:
 
 ```jsx
+import { createContext, useContext, useReducer } from 'react';
+
 const CartContext = createContext(null);
+
+function cartReducer(state, action) { // siehe oben
+  // Reducer-Logik
+}
 
 export function CartContextProvider({ children }) {
   const [cart, dispatch] = useReducer(cartReducer, { items: [] });
@@ -1085,52 +1114,88 @@ export function useCart() {
 }
 ```
 
-Ergänze die Imports für `createContext`, `useContext` und `useReducer` und definiere `cartReducer` oberhalb des Providers.
-
-Ein Reducer soll beispielsweise keine Operation wie `state.items.push(...)` verwenden. Erstelle stattdessen ein neues Array, etwa mit `map`, `filter` oder Spread-Syntax. React erkennt Änderungen zuverlässig, wenn neuer State als neue Objekte zurückgegeben wird.
-
-**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 6 „State und Events“, insbesondere „Wo soll State gespeichert werden?“ und „Abgeleitete Werte“. Context und Reducer werden im Abschnitt oben zusätzlich eingeführt.
-
-### 6.4 Provider einhängen und Warenkorbaktionen verbinden
-
-Umschließe die Anwendung in `src/App.jsx` mit `CartContextProvider`. In `AccessoryItem` liest du `useCart()` und rufst beim Button-Klick `addItem(accessory)` auf.
-
-Die Provider werden in `App` um die gesamte Oberfläche gelegt:
+Erstelle anschließend die passende Verbindung in `src/App.jsx` und ergänze in `AccessoryItem.jsx` die `addItem`-Aktion beim Klick auf den Button. Der fertige Stand sieht dann so aus:
 
 ```jsx
+// src/App.jsx
+import Header from './Header.jsx';
+import Accessories from './components/Accessories.jsx';
+import { CartContextProvider } from './store/CartContext.jsx';
+
 function App() {
   return (
-    <UserProgressContextProvider>
-      <CartContextProvider>
-        <Header />
-        <main>
-          <Accessories />
-        </main>
-        <Cart />
-        <Checkout />
-      </CartContextProvider>
-    </UserProgressContextProvider>
+    <CartContextProvider>
+      <Header />
+      <main>
+        <Accessories />
+      </main>
+    </CartContextProvider>
   );
 }
+
+export default App;
 ```
 
-Importiere die Komponenten und Provider aus den Dateien, in denen du sie angelegt hast. Die Reihenfolge sorgt dafür, dass alle Shop-Komponenten beide Contexts lesen können.
+```jsx
+// src/components/AccessoryItem.jsx
+import Button from './UI/Button';
+import { formatPrice } from '../utils/formatting.js';
+import { useCart } from './../store/CartContext';
 
-Berechne Warenkorb-Anzahl und Zwischensumme aus `items`, statt sie zusätzlich im State zu speichern:
+function AccessoryItem({ accessory }) {
+  const { addItem } = useCart();
+  const imageUrl = `http://localhost:3000/${accessory.image}`;
 
-```js
-const itemCount = items.reduce((total, item) => total + item.quantity, 0);
-const total = items.reduce(
-  (sum, item) => sum + Number(item.price) * item.quantity,
-  0
-);
+  return (
+    <li className="accessory-item">
+      <article>
+        <img src={imageUrl} alt={accessory.name} />
+        <h3>{accessory.name}</h3>
+        <p className="accessory-item-description">{accessory.description}</p>
+        <p>{formatPrice(accessory.price)}</p>
+        <p className="accessory-item-actions">
+          <Button type="button" onClick={() => addItem(accessory)}>
+            In den Warenkorb
+          </Button>
+        </p>
+        </button>
+      </article>
+    </li>
+  );
+}
+
+export default AccessoryItem;
 ```
 
-Das sind **abgeleitete Werte**: Sie werden aus vorhandenem State berechnet. Wenn du sie parallel speicherst, können sie von den tatsächlichen Positionen abweichen.
+Ergänze zudem im Header `Header.jsx` die Anzeige der Warenkorb-Anzahl aus dem Context. Beachte dabei, dass die Anzahl sich aus den einzelnen Positionen und deren Mengen ergibt. Verwende `reduce` (vgl. dazu abgeleitete Werte in [react_theory.md](docs/react_theory.md)), um die Gesamtanzahl zu berechnen:
 
-Erstelle `CartItem.jsx`, das Name, Einzelpreis, Menge sowie „+“ und „−“-Aktionen darstellt. Verwende in jeder gerenderten Warenkorbposition `key={item.id}`.
+```jsx
+import { useCart } from '../store/CartContext.jsx';
 
-**Checkpoint:** Produkte lassen sich hinzufügen. Mehrfaches Hinzufügen erhöht die Menge; „−“ verringert sie und entfernt sie bei Menge eins. Kopfzeile und Summe aktualisieren sich direkt.
+function Header() {
+  const { items } = useCart();
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+
+  return (
+    <header id="main-header">
+      <div id="title">
+        <img src={logoImg} alt="Gaming Accessoires" />
+        <h1>Gaming Accessoires</h1>
+      </div>
+      <nav aria-label="Hauptnavigation">
+        <Button type="button" textOnly disabled>
+          Warenkorb ({itemCount})
+        </Button>
+      </nav>
+    </header>
+  );
+}
+
+export default Header;
+
+```
+
+**Checkpoint:** Produkte lassen sich hinzufügen. Mehrfaches Hinzufügen erhöht die Menge.
 
 ## 7. Warenkorb und Checkout-Dialog
 
@@ -1138,27 +1203,26 @@ Erstelle `CartItem.jsx`, das Name, Einzelpreis, Menge sowie „+“ und „−�
 
 Erstelle `src/store/UserProgressContext.jsx` mit einem State `progress`, dessen Werte `null`, `'cart'` oder `'checkout'` sein können. Stelle Funktionen bereit, um Warenkorb und Checkout anzuzeigen und den Dialog zu schließen. So kann `Header` den Warenkorb öffnen und `Cart` zum Checkout wechseln.
 
-Verwende denselben Context/Provider-Aufbau wie für den Warenkorb, aber `useState` statt `useReducer`: `showCart()` setzt `progress` auf `'cart'`, `showCheckout()` auf `'checkout'` und `hideProgress()` auf `null`. Der Provider stellt `progress` und diese drei Funktionen bereit. In `App` kommt der Provider oberhalb von `CartContextProvider`, damit alle Shop-Komponenten darauf zugreifen können.
+Verwende denselben Context/Provider-Aufbau wie für den Warenkorb, aber `useState` statt `useReducer`: `showCart()` setzt `progress` auf `'cart'`, `showCheckout()` auf `'checkout'` und `hideProgress()` auf `null`. Der Provider stellt `progress` und diese drei Funktionen bereit.
 
 Ein möglicher vollständiger Context:
 
 ```jsx
 import { createContext, useContext, useState } from 'react';
 
-const UserProgressContext = createContext(null);
+const UserProgressContext = createContext();
 
 export function UserProgressContextProvider({ children }) {
   const [progress, setProgress] = useState(null);
 
-  const value = {
-    progress,
-    showCart: () => setProgress('cart'),
-    showCheckout: () => setProgress('checkout'),
-    hideProgress: () => setProgress(null),
-  };
+  const showCart = () => setProgress('cart');
+  const showCheckout = () => setProgress('checkout');
+  const closeDialog = () => setProgress(null);
 
   return (
-    <UserProgressContext.Provider value={value}>
+    <UserProgressContext.Provider
+      value={{ progress, showCart, showCheckout, closeDialog }}
+    >
       {children}
     </UserProgressContext.Provider>
   );
@@ -1167,13 +1231,41 @@ export function UserProgressContextProvider({ children }) {
 export function useUserProgress() {
   const context = useContext(UserProgressContext);
   if (context === null) {
-    throw new Error('useUserProgress muss innerhalb von UserProgressContextProvider verwendet werden.');
+    throw new Error(
+      'useUserProgress muss innerhalb von UserProgressContextProvider laufen.'
+    );
   }
   return context;
 }
 ```
 
-### 7.2 Zusätzliche Theorie: natives `<dialog>`, `useRef` und DOM-APIs
+In `App` kommt der Provider oberhalb von `CartContextProvider`. Die Reihenfolge sorgt dafür, dass alle Shop-Komponenten beide Contexts lesen können.
+
+```jsx
+import Accessories from "./components/Accessories";
+import Header from "./components/Header";
+import { CartContextProvider } from "./store/CartContext";
+import { UserProgressContextProvider } from './store/UserProgessContext';
+
+function App() {
+  return (
+    <>
+      <UserProgressContextProvider>
+        <CartContextProvider>
+          <Header />
+          <main>
+            <Accessories />
+          </main>
+        </CartContextProvider>
+      </UserProgressContextProvider>
+    </>
+  )
+}
+
+export default App;
+```
+
+### 7.2 Zusätzliche Theorie: natives `<dialog>`, `useRef` und Modale Dialog-Komponente
 
 Ein **Ref** ist eine Referenz auf ein DOM-Element. Anders als State löst eine Änderung an einem Ref selbst kein erneutes Rendern aus. `useRef(null)` eignet sich unter anderem, wenn eine Browser-API direkt auf ein Element angewendet werden muss.
 
@@ -1193,7 +1285,7 @@ useEffect(() => {
 
 Eine Dialog-Komponente rendert das Element mit `ref={dialog}`. Beim Drücken der Escape-Taste wird das `cancel`-Ereignis ausgelöst. Verhindere das direkte native Schließen mit `event.preventDefault()` und melde das Schließen an die zuständige Context-Funktion; diese ändert den React-State, woraufhin der Effect den Dialog schließt. Verwende `useEffect` hier, weil `showModal()` eine Browser-API außerhalb des normalen React-Renderings ist.
 
-Die vollständige Komponentenhülle sieht beispielsweise so aus:
+Erstelle `src/components/UI/Modal.jsx` mit Props `open`, `onClose`, `className` und `children`. Implementiere darin den soeben erläuterten Effect. Setze das Dialog-Element nicht zusätzlich mit einem JSX-Attribut `open` auf, weil du es über `showModal()` und `close()` steuerst.
 
 ```jsx
 import { useEffect, useRef } from 'react';
@@ -1235,13 +1327,20 @@ export default function Modal({ children, open, onClose, className = '' }) {
 }
 ```
 
-Der vollständige, issuebezogene Stand für `Modal.jsx`, das Portal-Element und die Warenkorb-Komponente ist in Abschnitt 12.9 dokumentiert.
+Der `createPortal`-Aufruf rendert den Dialog in ein separates DOM-Element außerhalb des normalen React-Baums. Das ist für modale Dialoge sinnvoll, damit sie über der Seite liegen und nicht von CSS-Regeln der Elternkomponenten beeinflusst werden.
 
-**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 8 „`useEffect`“ und „Abhängigkeiten eines Effects“. Refs und die `<dialog>`-API werden dort nicht vertieft; die Erklärung oben gilt für die konkrete Verwendung im Tutorial.
+Folglich muss in `index.html` ein Container für die Portale mit der ID `modal` vorhanden sein. Ergänze dieses Element oberhalb des `root`-Elements:
+
+```html
+<body>
+  <div id="modal"></div>
+  <div id="root"></div>
+</body>
+```
 
 ### 7.3 Dialogkomponente und Warenkorb
 
-Erstelle `src/components/UI/Modal.jsx` mit Props `open`, `onClose`, `className` und `children`. Implementiere darin den Effect aus dem vorherigen Abschnitt. Setze das Dialog-Element nicht zusätzlich mit einem JSX-Attribut `open` auf, weil du es über `showModal()` und `close()` steuerst.
+Der Wartenkorb-Dialog wird in `src/components/Cart.jsx` implementiert. Er verwendet die Modal-Komponente und den Warenkorb-Context.
 
 `Cart.jsx` soll:
 
@@ -1252,17 +1351,150 @@ Erstelle `src/components/UI/Modal.jsx` mit Props `open`, `onClose`, `className` 
 - eine Schaltfläche „Weiter einkaufen“ zum Schließen und
 - eine Schaltfläche „Zur Kasse“ nur bei nichtleerem Warenkorb zeigen.
 
-Beim Klick auf „Zur Kasse“ wechselst du den Dialogzustand zu `'checkout'`. Berechne die Summe wieder aus den Warenkorbpositionen.
+Damit der Warenkorb-Dialog korrekt geöffnet und geschlossen wird, musst du in `Cart.jsx` den Zustand `progress` aus dem UserProgress-Context lesen. Übergib dem Warenkorb-Dialog den Zustand `open={progress === 'cart'}` und einen `onClose`-Callback, der den Dialogzustand zurücksetzt. Die Modal-Komponente ruft diesen Callback beim Escape-Ereignis auf. Wenn der Warenkorb beim Wechsel zum Checkout programmatisch geschlossen wird, wird kein Escape-Ereignis ausgelöst. Beim Klick auf „Zur Kasse“ wechselst du den Dialogzustand zu `'checkout'`.
 
-Übergib dem Warenkorb-Dialog `open={progress === 'cart'}` und einen `onClose`-Callback, der den Dialogzustand zurücksetzt. Die Modal-Komponente ruft diesen Callback beim Escape-Ereignis auf. Wenn der Warenkorb beim Wechsel zum Checkout programmatisch geschlossen wird, wird kein Escape-Ereignis ausgelöst; der Zustand bleibt daher auf `'checkout'` und das Checkout-Dialogfenster kann öffnen.
+```jsx
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
+import Button from './UI/Button';
+import CartItem from './CartItem';
+import Modal from './UI/Modal';
 
-**Checkpoint:** Warenkorb lässt sich über die Kopfzeile öffnen, per Escape oder Schaltfläche schließen und zum Checkout wechseln.
+export default function Cart() {
+  const { items, addItem, removeItem } = useCart();
+  const { progress, closeDialog, showCheckout } = useUserProgress();
+  const cartTotal = items.reduce(
+    (total, item) => total + Number(item.price) * item.quantity,
+    0
+  );
+  const isOpen = progress === 'cart';
+
+  return (
+    <Modal className="cart" open={isOpen} onClose={closeDialog}>
+      <h2>Warenkorb</h2>
+      {items.length === 0 ? (
+        <p>Dein Warenkorb ist leer.</p>
+      ) : (
+        <ul>
+          {items.map((item) => (
+            <CartItem
+              key={item.id}
+              item={item}
+              onIncrease={() => addItem(item)}
+              onDecrease={() => removeItem(item.id)}
+            />
+          ))}
+        </ul>
+      )}
+      <p className="cart-total">
+        Summe: {formatPrice(cartTotal)}
+      </p>
+      <div className="modal-actions">
+        <Button type="button" textOnly onClick={closeDialog}>
+          Weiter einkaufen
+        </Button>
+        {items.length > 0 && (
+          <Button type="button" onClick={showCheckout}>
+            Zur Kasse
+          </Button>
+        )}
+      </div>
+    </Modal>
+  );
+}
+```
+
+Die `CartItem`-Komponente zeigt die Produktdaten, die Menge und zwei Schaltflächen zum Erhöhen und Verringern der Menge. Die Schaltflächen rufen die passenden Aktionen aus dem Warenkorb-Context auf.
+
+```jsx
+import { formatPrice } from './../utils/formatting.js';
+import Button from './UI/Button.jsx';
+
+export default function CartItem({ item, onIncrease, onDecrease }) {
+  return (
+    <li className="cart-item">
+      <p>
+        {item.name} - {item.quantity} x{' '}
+        {formatPrice(Number(item.price))}
+      </p>
+      <div className="cart-item-actions">
+        <Button
+          type="button"
+          aria-label={`${item.name} Menge verringern`}
+          onClick={onDecrease}
+        >
+          -
+        </Button>
+        <span aria-live="polite">{item.quantity}</span>
+        <Button
+          type="button"
+          aria-label={`${item.name} Menge erhöhen`}
+          onClick={onIncrease}
+        >
+          +
+        </Button>
+      </div>
+    </li>
+  );
+}
+```
+
+Jetzt musst du noch die Schaltfläche im Header anpassen, damit sie den Warenkorb-Dialog öffnet. Verwende dafür die Funktion `showCart()` aus dem UserProgress-Context:
+
+```jsx
+import logoImg from '../assets/logo.png';
+import Button from './UI/Button';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+
+function Header() {
+    const { items } = useCart();
+    const { showCart } = useUserProgress();
+    const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+    
+    return (
+        <header id="main-header">
+            <div id="title">
+                <img src={logoImg} alt="Gaming Accessoires" />
+                <h1>Gaming Accessoires</h1>
+            </div>
+            <nav aria-label="Hauptnavigation">
+                <Button type="button" textOnly onClick={showCart}>
+                    Warenkorb ({itemCount})
+                </Button>
+            </nav>
+        </header>
+    );
+}
+
+export default Header;
+```
+
+**Checkpoint:** Warenkorb lässt sich über die Kopfzeile öffnen, per Escape oder Schaltfläche "Weiter einkaufen" schließen.
+
+Damit ist der Warenkorb-Dialog fertig. Im nächsten Schritt implementierst du den Checkout-Dialog, der die Eingabe von Kundendaten und das Absenden der Bestellung ermöglicht.
 
 ## 8. Bestellformular an das Backend senden
 
 ### 8.1 Formular und Eingabekomponenten
 
 Erstelle eine wiederverwendbare `Input.jsx`-Komponente mit Props für `label`, `id` und weitere native Input-Eigenschaften. Verknüpfe das Label mit dem Eingabefeld über `htmlFor={id}` und `id={id}`. Formulareingaben müssen einen `name` besitzen, damit der Browser ihre Werte in `FormData` aufnehmen kann.
+
+```jsx
+function Input({ label, id, ...props }) {
+  return (
+    <p className="control">
+      <label htmlFor={id}>{label}</label>
+      <input id={id} name={id} required {...props} />
+    </p>
+  );
+}
+
+export default Input;
+```
+
+Verwende für die Felder `required`. Das ist eine erste clientseitige Validierung und reduziert die Fehleranfälligkeit. Das Backend validiert unabhängig davon nochmals. Die Namen müssen exakt zum Backend-Vertrag passen.
 
 Das Formular benötigt diese Felder:
 
@@ -1274,9 +1506,105 @@ Das Formular benötigt diese Felder:
 | Postleitzahl | `postal-code` | erforderlich |
 | Ort | `city` | erforderlich |
 
-Verwende für die Felder `required`. Das ist eine erste clientseitige Validierung und verbessert die Bedienung. Das Backend validiert unabhängig davon nochmals. Die Namen müssen exakt zum Backend-Vertrag passen.
+Lege eine neue Komponente `Checkout.jsx` an, die den Checkout-Dialog darstellt. Sie verwendet ebenfalls die Modal-Komponente und den UserProgress-Context. Der Checkout-Dialog zeigt ein Formular mit den erforderlichen Eingabefeldern und eine Schaltfläche zum Absenden der Bestellung. Nach erfolgreichem Absenden wird der Warenkorb geleert und der Dialog geschlossen.
 
-### 8.2 Zusätzliche Theorie: eigene Hooks und Request-Lebenszyklus
+Seit React 19 kann das `action`-Attribut eines `<form>` direkt eine Funktion erhalten, statt den klassischen Umweg über `onSubmit` und `event.preventDefault()` zu gehen. React ruft diese Funktion beim Absenden automatisch mit einem `FormData`-Objekt auf; ein eigener `preventDefault()`-Aufruf ist nicht nötig, da React das native Neuladen der Seite bereits unterbindet.
+
+`useActionState(actionFn, initialState)` verbindet eine solche Action mit React-State und liefert ein Array `[state, formAction, isPending]`:
+
+- `state` ist der zuletzt von `actionFn` zurückgegebene Wert (zu Beginn `initialState`),
+- `formAction` wird an `<form action={...}>` übergeben,
+- `isPending` ist `true`, solange `actionFn` noch läuft, und eignet sich direkt für `disabled` und Ladehinweise – ein eigener `isSubmitted`- oder `isSending`-State ist dafür nicht mehr nötig.
+
+`actionFn` erhält als Parameter `(previousState, formData)` und darf `async` sein; React wartet automatisch auf das zurückgegebene Promise, bevor `isPending` wieder auf `false` wechselt.
+
+Die Funktion `checkoutAction` ist die `actionFn`, welche wir später nutzen, um die Bestellung an das Backend zu senden. Übergib `formAction` an `<form action={formAction}>`; ein `onSubmit`-Handler und `event.preventDefault()` entfallen damit.
+
+Setze beim Button zum Absenden `disabled={isSending}` und zeige bei `isSending` einen Ladehinweis. Nach erfolgreichem Absenden wird der Warenkorb geleert und der Dialog geschlossen.
+
+
+```jsx
+import { useActionState } from 'react';
+
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
+import Input from './UI/Input.jsx';
+import Button from './UI/Button';
+import Modal from './UI/Modal';
+
+export default function Checkout() {
+  const { items } = useCart();
+  const { progress, closeDialog } = useUserProgress();
+  const isOpen = progress === 'checkout';
+
+  const cartTotal = items.reduce(
+    (total, item) => total + Number(item.price) * item.quantity,
+    0
+  );
+
+  async function checkoutAction(_prevState, formData) {
+    // send the order to the backend
+    return null;
+  }
+
+  const [, formAction, isSending] = useActionState(checkoutAction, null);
+
+  return (
+    <Modal className="checkout" open={isOpen} onClose={closeDialog}>
+      <h2>Checkout</h2>
+      <form action={formAction}>
+        <h2>Zur Kasse</h2>
+        <p>Gesamtbetrag: {formatPrice(cartTotal)}</p>
+
+        <Input label="Name" type="text" id="name" autoComplete="name" />
+        <Input
+          label="E-Mail-Adresse"
+          type="email"
+          id="email"
+          autoComplete="email"
+        />
+        <Input
+          label="Straße"
+          type="text"
+          id="street"
+          autoComplete="street-address"
+        />
+        <div className="control-row">
+          <Input
+            label="Postleitzahl"
+            type="text"
+            id="postal-code"
+            autoComplete="postal-code"
+          />
+          <Input
+            label="Ort"
+            type="text"
+            id="city"
+            autoComplete="address-level2"
+          />
+        </div>
+
+        <div className="modal-actions">
+          <Button type="button" textOnly onClick={closeDialog}>
+            Abbrechen
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSending || items.length === 0}
+          >
+            {isSending ? 'Bestellung wird gesendet...' : 'Bestellung absenden'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+```
+
+**Checkpoint:** Das Checkout-Formular zeigt die Eingabefelder und den Gesamtbetrag.
+
+### 8.2 Theorie: eigene Hooks und Request-Lebenszyklus
 
 `Accessories` lädt die Produkte bereits mit einem eigenen Lade-, Fehler- und Datenstate rund um `fetch` (Abschnitt 5.1). Für das Absenden der Bestellung brauchst du ein fast identisches Muster: wieder einen Lade-State, einen Fehler-State und wieder `fetch` mit Statusprüfung. Statt diese Logik ein zweites Mal zu schreiben, lohnt es sich jetzt, sie in einen eigenen Hook auszulagern.
 
@@ -1452,16 +1780,16 @@ export default function Accessories() {
 }
 ```
 
-Entferne die drei State-Werte, den Effect, den `AbortController` und die `fetch`-Logik vollständig. An ihre Stelle tritt ein einziger Aufruf von `useHttp`, der dieselben drei Werte liefert:
+Entferne die drei State-Werte, den Effect, den `AbortController` und die `fetch`-Logik vollständig. An ihre Stelle tritt ein einziger Aufruf von `useHttp`, der dieselben drei Werte liefert. Ergänze zudem eine Konstante `requestConfig` außerhalb der Komponente, die als Fetch-Optionen an den Hook übergeben wird. So bleibt die Referenz stabil und löst nicht bei jedem Rendern einen neuen Request aus.
 
 ```jsx
-import AccessoryItem from './AccessoryItem.jsx';
-import useHttp from '../hooks/useHttp.js';
+import AccessoryItem from './AccessoryItem';
+import useHttp from './../hooks/useHttp.js';
 import Error from './Error.jsx';
 
 const requestConfig = {};
 
-export default function Accessories() {
+function Accessories() {
   const {
     data: loadedAccessories,
     isLoading,
@@ -1469,7 +1797,7 @@ export default function Accessories() {
   } = useHttp('http://localhost:3000/accessories', requestConfig, []);
 
   if (isLoading) {
-    return <p className="center">Produkte werden geladen …</p>;
+    return <p className="center">Produkte werden geladen ...</p>;
   }
 
   if (error) {
@@ -1488,27 +1816,24 @@ export default function Accessories() {
 }
 ```
 
-Beachte, dass `requestConfig` als Konstante außerhalb der Komponente steht, statt bei jedem Rendern neu als `{}` erzeugt zu werden. `config` ist Abhängigkeit des `useCallback` für `sendRequest` und des automatisch startenden Effects in `useHttp`. Ein bei jedem Rendern neues Objekt hätte eine neue Referenz, selbst wenn der Inhalt gleich bleibt; der Effect würde dadurch nach jedem Rendern erneut auslösen und endlos nachladen. Eine außerhalb der Komponente angelegte Konstante bleibt referenziell stabil, solange die Komponente nicht neu geladen wird.
+Beachte, dass `requestConfig` als Konstante außerhalb der Komponente steht, statt bei jedem Rendern neu als `{}` erzeugt zu werden. `config` ist Abhängigkeit des `useCallback` für `sendRequest` und des automatisch startenden Effects in `useHttp`. Ein bei jedem Rendern neues Objekt hätte eine neue Referenz, selbst wenn der Inhalt gleich bleibt; der Effect würde dadurch nach jedem Rendern erneut auslösen und endlos nachladen. Eine außerhalb der Komponente angelegte Konstante bleibt referenziell stabil, solange die Komponente nicht neu geladen wird. Imports, Zustände (`isLoading`, `error`, Liste) und das `map` über `loadedAccessories` bleiben inhaltlich gleich; nur Herkunft und Bündelung der drei Werte ändern sich. Deshalb sind die Imports für useState und useEffect nicht mehr nötig.
 
-Imports, Zustände (`isLoading`, `error`, Liste) und das `map` über `loadedAccessories` bleiben inhaltlich gleich; nur Herkunft und Bündelung der drei Werte ändern sich. Der vollständige Dateiinhalt von `useHttp.js` und der überarbeiteten `Accessories.jsx` steht in Abschnitt 12.7.
+Für Fehlermeldungen erstellst du eine neue `Error.jsx`-Komponente, die Titel und Nachricht als Props erhält und in einem `<p>` mit `role="alert"` rendert. So kann der Screenreader die Fehlermeldung direkt vorlesen.
 
-### 8.4 Zusätzliche Theorie: Formular-Actions und `useActionState`
+```jsx
+export default function Error({ title, message }) {
+  return (
+    <div className="error" role="alert">
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </div>
+  );
+}
+```
 
-Seit React 19 kann das `action`-Attribut eines `<form>` direkt eine Funktion erhalten, statt den klassischen Umweg über `onSubmit` und `event.preventDefault()` zu gehen. React ruft diese Funktion beim Absenden automatisch mit einem `FormData`-Objekt auf; ein eigener `preventDefault()`-Aufruf ist nicht nötig, da React das native Neuladen der Seite bereits unterbindet.
+**Checkpoint:** Produkte werden geladen und angezeigt. Bei gestopptem Backend erscheint eine Fehlermeldung.
 
-`useActionState(actionFn, initialState)` verbindet eine solche Action mit React-State und liefert ein Array `[state, formAction, isPending]`:
-
-- `state` ist der zuletzt von `actionFn` zurückgegebene Wert (zu Beginn `initialState`),
-- `formAction` wird an `<form action={...}>` übergeben,
-- `isPending` ist `true`, solange `actionFn` noch läuft, und eignet sich direkt für `disabled` und Ladehinweise – ein eigener `isSubmitted`- oder `isSending`-State ist dafür nicht mehr nötig.
-
-`actionFn` erhält als Parameter `(previousState, formData)` und darf `async` sein; React wartet automatisch auf das zurückgegebene Promise, bevor `isPending` wieder auf `false` wechselt. Du kannst innerhalb von `actionFn` weiterhin den Hook `useHttp` aus Abschnitt 8.3 verwenden: `actionFn` ruft `sendRequest(...)` auf und wartet dessen Ergebnis ab, während `useHttp` wie gewohnt für Abbruch, Datenhaltung und Fehlerzustand zuständig bleibt. So verbinden sich die beiden Konzepte, statt sich zu ersetzen.
-
-**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 7 „Formulare und Validierung“. Form-Actions und `useActionState` sind ein React-19-Feature und daher dort noch nicht beschrieben; die klassische Variante mit `onSubmit` und `event.preventDefault()` aus Kapitel 7 bleibt ein gültiger, kontrollierter Ansatz für andere Formulare.
-
-**Hinweis zur React-Version:** `useActionState` setzt React 19 voraus. Das in Abschnitt 2.1 erzeugte Vite-Projekt installiert React 19 standardmäßig; prüfe sicherheitshalber die Version in `frontend/package.json` (`"react": "^19..."`). Falls dort eine ältere Hauptversion steht, führe `npm install react@^19 react-dom@^19` im Ordner `frontend/` aus, bevor du mit diesem Abschnitt fortfährst.
-
-### 8.5 Bestellung mit `useHttp` und `useActionState` senden
+### 8.4 Bestellung mit `useHttp` und `useActionState` senden
 
 Verwende `useHttp` wie in `Accessories.jsx` mit einer außerhalb der Komponente angelegten, referenziell stabilen Request-Konfiguration, diesmal für `POST` und ohne `initialData`:
 
@@ -1518,15 +1843,20 @@ const requestConfig = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const { data, error, sendRequest, clearData } = useHttp(
-  'http://localhost:3000/orders',
-  requestConfig
-);
+export default function Checkout() {
+  const { data, error, sendRequest, clearData } = useHttp(
+    'http://localhost:3000/orders',
+    requestConfig
+  );
+  ...
+}
 ```
 
 Lies `items` und `clearCart` aus `useCart()`. Die Action-Funktion verpackt die Formulardaten und den Warenkorb in den vom Backend erwarteten Umschlag `{ order: { customer, items } }` und delegiert das eigentliche Senden an `sendRequest`:
 
 ```jsx
+const { items, clearCart } = useCart();
+
 async function checkoutAction(previousState, formData) {
   const customer = Object.fromEntries(formData.entries());
   const order = { customer, items };
@@ -1539,15 +1869,135 @@ const [, formAction, isSending] = useActionState(checkoutAction, null);
 
 Das Backend erwartet den Wrapper `order` und die Positionen mit `quantity`. Schicke nicht nur `customer` oder ein Feld `products`; das entspricht nicht dem API-Vertrag.
 
-`sendRequest` prüft intern `response.ok` und wirft bereits einen Fehler mit der `message` aus der Antwort, wenn sie vorhanden ist; dieser Fehler landet automatisch im `error`-Rückgabewert von `useHttp`. Einen eigenen Erfolgs-State brauchst du nicht: Leite den Erfolg direkt aus dem Hook ab, etwa mit `const orderSucceeded = Boolean(data) && !error;`. Übergib `formAction` an `<form action={formAction}>`; ein `onSubmit`-Handler und `event.preventDefault()` entfallen damit.
+`sendRequest` prüft intern `response.ok` und wirft bereits einen Fehler mit der `message` aus der Antwort, wenn sie vorhanden ist; dieser Fehler landet automatisch im `error`-Rückgabewert von `useHttp`. Einen eigenen Erfolgs-State brauchst du nicht: Leite den Erfolg direkt aus dem Hook ab, etwa mit `const orderSucceeded = Boolean(data) && !error;`.
 
-Setze `disabled={isSending}` auf die Absende-Schaltfläche und zeige bei `isSending` einen Ladehinweis. Zeige `error` mit `role="alert"` an. Ist `orderSucceeded` wahr, rendere anstelle des Formulars eine Bestätigung mit einer Schaltfläche zum Beenden. In deren Handler kannst du `clearCart()`, `clearData()` und `hideCheckout()` aufrufen; `clearData()` setzt dabei Daten- und Fehlerzustand des Hooks zurück, damit `orderSucceeded` wieder `false` wird und ein erneuter Checkout im leeren Ausgangszustand startet.
+Zeige `error` mit `role="alert"` an. Ist `orderSucceeded` wahr, rendere anstelle des Formulars eine Bestätigung mit einer Schaltfläche zum Beenden. In deren Handler kannst du `clearCart()`, `clearData()` und `closeDialog()` aufrufen; `clearData()` setzt dabei Daten- und Fehlerzustand des Hooks zurück, damit `orderSucceeded` wieder `false` wird und ein erneuter Checkout im leeren Ausgangszustand startet.
 
 Behandle einen nicht erfolgreichen HTTP-Status als Fehler und zeige dessen `message` an. Zeige im Erfolgszustand eine Bestätigung. Leere den Warenkorb erst, wenn der Request erfolgreich war. Bei einem Fehler bleiben Warenkorb und Formular erhalten, damit die Bestellung erneut versucht werden kann.
 
-**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 7 „Formulare und Validierung“ und Kapitel 8 „Daten an die Mock-API senden“. Du verwendest hier ein nicht kontrolliertes Formular mit `FormData`, dessen Absenden über eine Form-Action statt über `onSubmit` abläuft (siehe 8.4); kontrollierte Felder mit `value` und `onChange` sind eine Alternative aus Kapitel 7.
+Folgend die komplette `Checkout.jsx`-Komponente:
 
-### 8.6 Erfolgreichen Abschluss umsetzen
+```jsx
+import { useActionState } from 'react';
+
+import Input from './UI/Input.jsx';
+import Button from './UI/Button';
+import Modal from './UI/Modal';
+import Error from './Error.jsx';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
+import useHttp from '../hooks/useHttp.js';
+
+const requestConfig = {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+};
+
+export default function Checkout() {
+  const { data, error, sendRequest, clearData } = useHttp(
+    'http://localhost:3000/orders',
+    requestConfig
+  );
+  const { items, clearCart } = useCart();
+  const { progress, closeDialog } = useUserProgress();
+  const isOpen = progress === 'checkout';
+
+  const cartTotal = items.reduce(
+    (total, item) => total + Number(item.price) * item.quantity,
+    0
+  );
+  const orderSucceeded = Boolean(data) && !error;
+
+  async function checkoutAction(_prevState, formData) {
+    const customer = Object.fromEntries(formData.entries());
+    const order = { customer, items };
+    await sendRequest(JSON.stringify({ order }));
+    return null;
+  }
+
+  const [, formAction, isSending] = useActionState(checkoutAction, null);
+
+  function handleFinish() {
+    clearCart();
+    clearData();
+    closeDialog();
+  }
+
+  if (orderSucceeded) {
+    return (
+      <Modal
+        open={progress === 'checkout'}
+        onClose={handleFinish}
+        className="checkout"
+      >
+        <h2>Bestellung erfolgreich</h2>
+        <p>Vielen Dank für deine Bestellung.</p>
+        <div className="modal-actions">
+          <Button type="button" onClick={handleFinish}>
+            Fertig
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
+
+
+  return (
+    <Modal className="checkout" open={isOpen} onClose={closeDialog}>
+      <h2>Checkout</h2>
+      <form action={formAction}>
+        <h2>Zur Kasse</h2>
+        <p>Gesamtbetrag: {formatPrice(cartTotal)}</p>
+
+        <Input label="Name" type="text" id="name" autoComplete="name" />
+        <Input
+          label="E-Mail-Adresse"
+          type="email"
+          id="email"
+          autoComplete="email"
+        />
+        <Input
+          label="Straße"
+          type="text"
+          id="street"
+          autoComplete="street-address"
+        />
+        <div className="control-row">
+          <Input
+            label="Postleitzahl"
+            type="text"
+            id="postal-code"
+            autoComplete="postal-code"
+          />
+          <Input
+            label="Ort"
+            type="text"
+            id="city"
+            autoComplete="address-level2"
+          />
+        </div>
+
+        {error && (
+          <Error title="Bestellung fehlgeschlagen" message={error} />
+        )}
+
+        <div className="modal-actions">
+          <Button type="button" textOnly onClick={closeDialog}>
+            Abbrechen
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSending || items.length === 0}
+          >
+            {isSending ? 'Bestellung wird gesendet...' : 'Bestellung absenden'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+```
 
 Nach bestätigtem Erfolg soll „Fertig“:
 
@@ -1557,7 +2007,7 @@ Nach bestätigtem Erfolg soll „Fertig“:
 
 Setze diese Aktionen nicht schon vor dem Absenden um. Falls der Request fehlschlägt, dürfen die eingegebenen Daten und Warenkorbpositionen nicht verloren gehen.
 
-**Checkpoint:** Fülle alle Felder aus und sende eine Bestellung. Prüfe, dass der Erfolgszustand angezeigt wird und die Bestellung in `backend/data/orders.json` gespeichert wurde. Teste auch einen leeren Warenkorb und einen Request bei gestopptem Backend.
+**Checkpoint:** Fülle alle Felder aus und sende eine Bestellung. Prüfe, dass der Erfolgszustand angezeigt wird und die Bestellung in `backend/data/orders.json` gespeichert wurde. Teste auch einen Request bei gestopptem Backend.
 
 ## 9. Styling und Bedienbarkeit
 
@@ -1987,7 +2437,7 @@ Commit: `feat: build static accessory catalog (UI-01)`.
 
 ### 12.7 `API-02` – HTTP-Hook und echte Produktdaten
 
-Lege die folgenden neuen Dateien an und ersetze `Accessories.jsx` und `AccessoryItem.jsx`. Der Hook wird sowohl zum Laden der Produktliste als auch später im Checkout zum Senden der Bestellung verwendet; Aufbau und Funktionsweise von `useHttp` sind in Abschnitt 8.2 und 8.3 erklärt.
+Lege die folgenden neuen Dateien an und ersetze `Accessories.jsx` sowie `AccessoryItem.jsx`. Der Hook wird sowohl zum Laden der Produktliste als auch später im Checkout zum Senden der Bestellung verwendet; Aufbau und Funktionsweise von `useHttp` sind in Abschnitt 8.2 und 8.3 erklärt.
 
 **Projektstruktur nach `API-02`:**
 
@@ -2119,6 +2569,14 @@ export const currencyFormatter = new Intl.NumberFormat('de-AT', {
   style: 'currency',
   currency: 'EUR',
 });
+
+export function formatPrice(value) {
+  const price = Number(value);
+  if (!Number.isFinite(price)) {
+    throw new Error(`Ungültiger Preis: ${value}`);
+  }
+  return currencyFormatter.format(price);
+}
 ```
 
 **`frontend/src/components/Error.jsx` – vollständiger Inhalt**
@@ -2137,13 +2595,13 @@ export default function Error({ title, message }) {
 **`frontend/src/components/Accessories.jsx` – vollständiger Inhalt**
 
 ```jsx
-import AccessoryItem from './AccessoryItem.jsx';
-import useHttp from '../hooks/useHttp.js';
+import AccessoryItem from './AccessoryItem';
+import useHttp from './../hooks/useHttp.js';
 import Error from './Error.jsx';
 
 const requestConfig = {};
 
-export default function Accessories() {
+function Accessories() {
   const {
     data: loadedAccessories,
     isLoading,
@@ -2151,7 +2609,7 @@ export default function Accessories() {
   } = useHttp('http://localhost:3000/accessories', requestConfig, []);
 
   if (isLoading) {
-    return <p className="center">Produkte werden geladen …</p>;
+    return <p className="center">Produkte werden geladen ...</p>;
   }
 
   if (error) {
@@ -2160,54 +2618,38 @@ export default function Accessories() {
     );
   }
 
-  if (loadedAccessories.length === 0) {
-    return <p className="center">Aktuell sind keine Produkte verfügbar.</p>;
-  }
-
   return (
-    <section aria-labelledby="accessories-heading">
-      <h2 id="accessories-heading" className="center">
-        Produkte
-      </h2>
-      <ul id="accessories">
-        {loadedAccessories.map((accessory) => (
-          <AccessoryItem key={accessory.id} accessory={accessory} />
-        ))}
-      </ul>
-    </section>
+    <ul id="accessories">
+      {loadedAccessories.map((accessory) => (
+        <AccessoryItem key={accessory.id} accessory={accessory} />
+      ))}
+    </ul>
   );
 }
+
+export default Accessories;
 ```
 
 **`frontend/src/components/AccessoryItem.jsx` – vollständiger Inhalt**
 
 ```jsx
-import Button from './UI/Button.jsx';
-import { currencyFormatter } from '../utils/formatting.js';
+import Button from './UI/Button';
+import { formatPrice } from '../utils/formatting.js';
+import { useCart } from './../store/CartContext';
 
-export default function AccessoryItem({ accessory }) {
-  const price = Number(accessory.price);
-
-  if (!Number.isFinite(price)) {
-    throw new Error(`Ungültiger Preis für ${accessory.name}: ${accessory.price}`);
-  }
+function AccessoryItem({ accessory }) {
+  const { addItem } = useCart();
+  const imageUrl = `http://localhost:3000/${accessory.image}`;
 
   return (
     <li className="accessory-item">
       <article>
-        <img
-          src={`http://localhost:3000/${accessory.image}`}
-          alt={accessory.name}
-        />
-        <div className="accessory-item-content">
-          <h3>{accessory.name}</h3>
-          <p className="accessory-item-price">
-            {currencyFormatter.format(price)}
-          </p>
-          <p className="accessory-item-description">{accessory.description}</p>
-        </div>
+        <img src={imageUrl} alt={accessory.name} />
+        <h3>{accessory.name}</h3>
+        <p className="accessory-item-description">{accessory.description}</p>
+        <p>{formatPrice(accessory.price)}</p>
         <p className="accessory-item-actions">
-          <Button type="button" disabled>
+          <Button type="button" onClick={() => addItem(accessory)}>
             In den Warenkorb
           </Button>
         </p>
@@ -2215,6 +2657,8 @@ export default function AccessoryItem({ accessory }) {
     </li>
   );
 }
+
+export default AccessoryItem;
 ```
 
 **Hinweis zum Hook:** `requestConfig` muss außerhalb von `Accessories` definiert sein. Dadurch bekommt der Hook bei jedem Rendern nicht ein neues Konfigurationsobjekt, das den Effect erneut auslösen würde. `response.ok` muss geprüft werden, weil `fetch` bei HTTP-Fehlerstatus nicht automatisch eine Exception auslöst.
@@ -2256,9 +2700,7 @@ const CartContext = createContext(null);
 
 function cartReducer(state, action) {
   if (action.type === 'ADD_ITEM') {
-    const existingItem = state.items.find(
-      (item) => item.id === action.item.id
-    );
+    const existingItem = state.items.find((item) => item.id === action.item.id);
 
     if (existingItem) {
       return {
@@ -2306,13 +2748,13 @@ function cartReducer(state, action) {
 }
 
 export function CartContextProvider({ children }) {
-  const [cart, dispatchCartAction] = useReducer(cartReducer, { items: [] });
+  const [cart, dispatch] = useReducer(cartReducer, { items: [] });
 
   const value = {
     items: cart.items,
-    addItem: (item) => dispatchCartAction({ type: 'ADD_ITEM', item }),
-    removeItem: (id) => dispatchCartAction({ type: 'REMOVE_ITEM', id }),
-    clearCart: () => dispatchCartAction({ type: 'CLEAR_CART' }),
+    addItem: (item) => dispatch({ type: 'ADD_ITEM', item }),
+    removeItem: (id) => dispatch({ type: 'REMOVE_ITEM', id }),
+    clearCart: () => dispatch({ type: 'CLEAR_CART' }),
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
@@ -2321,7 +2763,7 @@ export function CartContextProvider({ children }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === null) {
-    throw new Error('useCart muss innerhalb von CartContextProvider laufen.');
+    throw new Error('useCart muss innerhalb von CartContextProvider verwendet werden.');
   }
   return context;
 }
@@ -2330,32 +2772,36 @@ export function useCart() {
 **`frontend/src/App.jsx` – vollständiger Inhalt**
 
 ```jsx
-import Header from './components/Header.jsx';
-import Accessories from './components/Accessories.jsx';
-import Cart from './components/Cart.jsx';
-import { CartContextProvider } from './store/CartContext.jsx';
+import Accessories from './components/Accessories';
+import Header from './components/Header';
+import Cart from './components/Cart';
+import { CartContextProvider } from './store/CartContext';
 
-export default function App() {
+function App() {
   return (
-    <CartContextProvider>
-      <Header />
-      <main>
-        <Accessories />
-        <Cart />
-      </main>
-    </CartContextProvider>
+    <>
+      <CartContextProvider>
+        <Header />
+        <main>
+          <Accessories />
+          <Cart />
+        </main>
+      </CartContextProvider>
+    </>
   );
 }
+
+export default App;
 ```
 
 **`frontend/src/components/Header.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { useCart } from '../store/CartContext.jsx';
-import Button from './UI/Button.jsx';
+import Button from './UI/Button';
 import logoImg from '../assets/logo.png';
+import { useCart } from './../store/CartContext';
 
-export default function Header() {
+function Header() {
   const { items } = useCart();
   const totalCartItems = items.reduce(
     (total, item) => total + item.quantity,
@@ -2376,37 +2822,28 @@ export default function Header() {
     </header>
   );
 }
+
+export default Header;
 ```
 
 **`frontend/src/components/AccessoryItem.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { useCart } from '../store/CartContext.jsx';
-import { currencyFormatter } from '../utils/formatting.js';
-import Button from './UI/Button.jsx';
+import Button from './UI/Button';
+import { formatPrice } from '../utils/formatting.js';
+import { useCart } from './../store/CartContext';
 
-export default function AccessoryItem({ accessory }) {
+function AccessoryItem({ accessory }) {
   const { addItem } = useCart();
-  const price = Number(accessory.price);
-
-  if (!Number.isFinite(price)) {
-    throw new Error(`Ungültiger Preis für ${accessory.name}: ${accessory.price}`);
-  }
+  const imageUrl = `http://localhost:3000/${accessory.image}`;
 
   return (
     <li className="accessory-item">
       <article>
-        <img
-          src={`http://localhost:3000/${accessory.image}`}
-          alt={accessory.name}
-        />
-        <div className="accessory-item-content">
-          <h3>{accessory.name}</h3>
-          <p className="accessory-item-price">
-            {currencyFormatter.format(price)}
-          </p>
-          <p className="accessory-item-description">{accessory.description}</p>
-        </div>
+        <img src={imageUrl} alt={accessory.name} />
+        <h3>{accessory.name}</h3>
+        <p className="accessory-item-description">{accessory.description}</p>
+        <p>{formatPrice(accessory.price)}</p>
         <p className="accessory-item-actions">
           <Button type="button" onClick={() => addItem(accessory)}>
             In den Warenkorb
@@ -2416,20 +2853,21 @@ export default function AccessoryItem({ accessory }) {
     </li>
   );
 }
+
+export default AccessoryItem;
 ```
 
 **`frontend/src/components/CartItem.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { currencyFormatter } from '../utils/formatting.js';
-import Button from './UI/Button.jsx';
+import { formatPrice } from '../utils/formatting.js';
+import Button from './UI/Button';
 
-export default function CartItem({ item, onIncrease, onDecrease }) {
+function CartItem({ item, onIncrease, onDecrease }) {
   return (
     <li className="cart-item">
       <p>
-        {item.name} – {item.quantity} ×{' '}
-        {currencyFormatter.format(Number(item.price))}
+        {item.name} – {item.quantity} × {formatPrice(item.price)}
       </p>
       <div className="cart-item-actions">
         <Button
@@ -2451,16 +2889,19 @@ export default function CartItem({ item, onIncrease, onDecrease }) {
     </li>
   );
 }
+
+export default CartItem;
 ```
 
 **`frontend/src/components/Cart.jsx` – vollständiger Inhalt für diesen Zwischenstand**
 
 ```jsx
-import { useCart } from '../store/CartContext.jsx';
-import { currencyFormatter } from '../utils/formatting.js';
-import CartItem from './CartItem.jsx';
+import { useCart } from './../store/CartContext';
+import { formatPrice } from './../utils/formatting.js';
+import Button from './UI/Button';
+import CartItem from './CartItem';
 
-export default function Cart() {
+function Cart() {
   const { items, addItem, removeItem } = useCart();
   const cartTotal = items.reduce(
     (total, item) => total + Number(item.price) * item.quantity,
@@ -2484,12 +2925,12 @@ export default function Cart() {
           ))}
         </ul>
       )}
-      <p className="cart-total">
-        Summe: {currencyFormatter.format(cartTotal)}
-      </p>
+      <p className="cart-total">Summe: {formatPrice(cartTotal)}</p>
     </section>
   );
 }
+
+export default Cart;
 ```
 
 In `Accessories.jsx` ist jetzt die API-Datenquelle aktiv. Entferne dort gegebenenfalls noch vorhandene `sampleAccessories`-Daten vollständig. Der Provider liegt oberhalb von Header, Produktliste und Warenkorb, damit alle drei dieselben Warenkorbdaten lesen.
@@ -2519,26 +2960,24 @@ frontend/src/
 frontend/index.html            (Dialog-Port ergänzen)
 ```
 
-**`frontend/src/store/UserProgressContext.jsx` – vollständiger Inhalt**
+**`frontend/src/store/UserProgessContext.jsx` – vollständiger Inhalt**
 
 ```jsx
 import { createContext, useContext, useState } from 'react';
 
-const UserProgressContext = createContext(null);
+const UserProgressContext = createContext();
 
 export function UserProgressContextProvider({ children }) {
   const [progress, setProgress] = useState(null);
 
-  const value = {
-    progress,
-    showCart: () => setProgress('cart'),
-    hideCart: () => setProgress(null),
-    showCheckout: () => setProgress('checkout'),
-    hideCheckout: () => setProgress(null),
-  };
+  const showCart = () => setProgress('cart');
+  const showCheckout = () => setProgress('checkout');
+  const closeDialog = () => setProgress(null);
 
   return (
-    <UserProgressContext.Provider value={value}>
+    <UserProgressContext.Provider
+      value={{ progress, showCart, showCheckout, closeDialog }}
+    >
       {children}
     </UserProgressContext.Provider>
   );
@@ -2567,7 +3006,6 @@ export default function Modal({ children, open, onClose, className = '' }) {
   useEffect(() => {
     const node = dialog.current;
     if (!node) return;
-
     if (open && !node.open) {
       node.showModal();
     } else if (!open && node.open) {
@@ -2604,12 +3042,12 @@ export default function Modal({ children, open, onClose, className = '' }) {
 
 ```html
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gaming Accessoires</title>
+    <title>Gaming Accessories</title>
   </head>
   <body>
     <div id="modal"></div>
@@ -2622,38 +3060,42 @@ export default function Modal({ children, open, onClose, className = '' }) {
 **`frontend/src/App.jsx` – vollständiger Inhalt**
 
 ```jsx
-import Header from './components/Header.jsx';
-import Accessories from './components/Accessories.jsx';
-import Cart from './components/Cart.jsx';
-import Checkout from './components/Checkout.jsx';
-import { CartContextProvider } from './store/CartContext.jsx';
-import { UserProgressContextProvider } from './store/UserProgressContext.jsx';
+import Accessories from './components/Accessories';
+import Header from './components/Header';
+import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import { CartContextProvider } from './store/CartContext';
+import { UserProgressContextProvider } from './store/UserProgessContext';
 
-export default function App() {
+function App() {
   return (
-    <UserProgressContextProvider>
-      <CartContextProvider>
-        <Header />
-        <main>
-          <Accessories />
-        </main>
-        <Cart />
-        <Checkout />
-      </CartContextProvider>
-    </UserProgressContextProvider>
+    <>
+      <UserProgressContextProvider>
+        <CartContextProvider>
+          <Header />
+          <main>
+            <Accessories />
+          </main>
+          <Cart />
+          <Checkout />
+        </CartContextProvider>
+      </UserProgressContextProvider>
+    </>
   );
 }
+
+export default App;
 ```
 
 **`frontend/src/components/Header.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { useCart } from '../store/CartContext.jsx';
-import { useUserProgress } from '../store/UserProgressContext.jsx';
-import Button from './UI/Button.jsx';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import Button from './UI/Button';
 import logoImg from '../assets/logo.png';
 
-export default function Header() {
+function Header() {
   const { items } = useCart();
   const { showCart } = useUserProgress();
   const totalCartItems = items.reduce(
@@ -2675,21 +3117,23 @@ export default function Header() {
     </header>
   );
 }
+
+export default Header;
 ```
 
 **`frontend/src/components/Cart.jsx` – vollständiger Inhalt**
 
 ```jsx
-import { useCart } from '../store/CartContext.jsx';
-import { useUserProgress } from '../store/UserProgressContext.jsx';
-import { currencyFormatter } from '../utils/formatting.js';
-import Button from './UI/Button.jsx';
-import CartItem from './CartItem.jsx';
-import Modal from './UI/Modal.jsx';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
+import Button from './UI/Button';
+import CartItem from './CartItem';
+import Modal from './UI/Modal';
 
 export default function Cart() {
   const { items, addItem, removeItem } = useCart();
-  const { progress, hideCart, showCheckout } = useUserProgress();
+  const { progress, closeDialog, showCheckout } = useUserProgress();
   const cartTotal = items.reduce(
     (total, item) => total + Number(item.price) * item.quantity,
     0
@@ -2697,7 +3141,7 @@ export default function Cart() {
   const isOpen = progress === 'cart';
 
   return (
-    <Modal className="cart" open={isOpen} onClose={hideCart}>
+    <Modal className="cart" open={isOpen} onClose={closeDialog}>
       <h2>Warenkorb</h2>
       {items.length === 0 ? (
         <p>Dein Warenkorb ist leer.</p>
@@ -2714,10 +3158,10 @@ export default function Cart() {
         </ul>
       )}
       <p className="cart-total">
-        Summe: {currencyFormatter.format(cartTotal)}
+        Summe: {formatPrice(cartTotal)}
       </p>
       <div className="modal-actions">
-        <Button type="button" textOnly onClick={hideCart}>
+        <Button type="button" textOnly onClick={closeDialog}>
           Weiter einkaufen
         </Button>
         {items.length > 0 && (
@@ -2734,84 +3178,30 @@ export default function Cart() {
 **`frontend/src/components/Checkout.jsx` – vorläufiger Platzhalter**
 
 ```jsx
-import { useUserProgress } from '../store/UserProgressContext.jsx';
-import Button from './UI/Button.jsx';
-import Modal from './UI/Modal.jsx';
-
-export default function Checkout() {
-  const { progress, hideCheckout } = useUserProgress();
-
-  return (
-    <Modal
-      open={progress === 'checkout'}
-      onClose={hideCheckout}
-      className="checkout"
-    >
-      <h2>Checkout</h2>
-      <p>Das Bestellformular wird im nächsten Issue ergänzt.</p>
-      <div className="modal-actions">
-        <Button type="button" textOnly onClick={hideCheckout}>
-          Schließen
-        </Button>
-      </div>
-    </Modal>
-  );
-}
-```
-
-`CartContext.jsx` und `CartItem.jsx` behalten den Inhalt aus `CART-01`. Prüfe, dass der Warenkorb nur bei `progress === 'cart'` geöffnet ist. Beim Wechsel zu `checkout` schließt der Warenkorb und das Checkout-Modal öffnet sich.
-
-**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 5 „Inhalte mit `children` übergeben“ und Kapitel 8 „`useEffect`“. Portals, Refs und native Dialogereignisse werden oben zusätzlich erläutert.
-
-Commit: `feat: add cart and checkout dialogs (CART-02)`.
-
-### 12.10 `ORDER-01` – Checkout-Formular und Bestellung
-
-Lege `src/components/UI/Input.jsx` an und ersetze den Platzhalter in `src/components/Checkout.jsx`. Der Request verwendet den Hook aus `API-02`.
-
-**Zusätzliche Theorie – `FormData`:** Ein HTML-Formular kann die Werte seiner benannten Eingabefelder selbst verwalten. `new FormData(form)` liest die aktuellen Werte aus; `Object.fromEntries(formData.entries())` wandelt sie in ein einfaches JavaScript-Objekt um. Dafür muss jedes Feld ein `name`-Attribut besitzen. Bei dieser Variante brauchst du nicht für jedes Eingabefeld einen eigenen React-State anzulegen. Die native Browserprüfung von `required` und `type="email"` ergänzt die serverseitige Validierung, ersetzt sie aber nicht.
-
-**`frontend/src/components/UI/Input.jsx` – vollständiger Inhalt**
-
-```jsx
-export default function Input({ label, id, ...props }) {
-  return (
-    <p className="control">
-      <label htmlFor={id}>{label}</label>
-      <input id={id} name={id} required {...props} />
-    </p>
-  );
-}
-```
-
-**`frontend/src/components/Checkout.jsx` – vollständiger Inhalt**
-
-```jsx
 import { useActionState } from 'react';
 
-import Modal from './UI/Modal.jsx';
 import Input from './UI/Input.jsx';
-import Button from './UI/Button.jsx';
+import Button from './UI/Button';
+import Modal from './UI/Modal';
 import Error from './Error.jsx';
-import { useCart } from '../store/CartContext.jsx';
-import { useUserProgress } from '../store/UserProgressContext.jsx';
-import { currencyFormatter } from '../utils/formatting.js';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
 import useHttp from '../hooks/useHttp.js';
 
 const requestConfig = {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 };
 
 export default function Checkout() {
-  const { items, clearCart } = useCart();
-  const { progress, hideCheckout } = useUserProgress();
   const { data, error, sendRequest, clearData } = useHttp(
     'http://localhost:3000/orders',
     requestConfig
   );
+  const { items, clearCart } = useCart();
+  const { progress, closeDialog } = useUserProgress();
+  const isOpen = progress === 'checkout';
 
   const cartTotal = items.reduce(
     (total, item) => total + Number(item.price) * item.quantity,
@@ -2819,7 +3209,7 @@ export default function Checkout() {
   );
   const orderSucceeded = Boolean(data) && !error;
 
-  async function checkoutAction(previousState, formData) {
+  async function checkoutAction(_prevState, formData) {
     const customer = Object.fromEntries(formData.entries());
     const order = { customer, items };
     await sendRequest(JSON.stringify({ order }));
@@ -2831,15 +3221,7 @@ export default function Checkout() {
   function handleFinish() {
     clearCart();
     clearData();
-    hideCheckout();
-  }
-
-  function handleClose() {
-    if (orderSucceeded) {
-      handleFinish();
-    } else {
-      hideCheckout();
-    }
+    closeDialog();
   }
 
   if (orderSucceeded) {
@@ -2861,14 +3243,11 @@ export default function Checkout() {
   }
 
   return (
-    <Modal
-      open={progress === 'checkout'}
-      onClose={handleClose}
-      className="checkout"
-    >
+    <Modal className="checkout" open={isOpen} onClose={closeDialog}>
+      <h2>Checkout</h2>
       <form action={formAction}>
         <h2>Zur Kasse</h2>
-        <p>Gesamtbetrag: {currencyFormatter.format(cartTotal)}</p>
+        <p>Gesamtbetrag: {formatPrice(cartTotal)}</p>
 
         <Input label="Name" type="text" id="name" autoComplete="name" />
         <Input
@@ -2903,14 +3282,164 @@ export default function Checkout() {
         )}
 
         <div className="modal-actions">
-          <Button type="button" textOnly onClick={handleClose}>
+          <Button type="button" textOnly onClick={closeDialog}>
             Abbrechen
           </Button>
           <Button
             type="submit"
             disabled={isSending || items.length === 0}
           >
-            {isSending ? 'Bestellung wird gesendet …' : 'Bestellung absenden'}
+            {isSending ? 'Bestellung wird gesendet...' : 'Bestellung absenden'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+```
+
+`CartContext.jsx` und `CartItem.jsx` behalten den Inhalt aus `CART-01`. Prüfe, dass der Warenkorb nur bei `progress === 'cart'` geöffnet ist. Beim Wechsel zu `checkout` schließt der Warenkorb und das Checkout-Modal öffnet sich.
+
+**Theorie-Verweis:** [react_theory.md](docs/react_theory.md), Kapitel 5 „Inhalte mit `children` übergeben“ und Kapitel 8 „`useEffect`“. Portals, Refs und native Dialogereignisse werden oben zusätzlich erläutert.
+
+Commit: `feat: add cart and checkout dialogs (CART-02)`.
+
+### 12.10 `ORDER-01` – Checkout-Formular und Bestellung
+
+Lege `src/components/UI/Input.jsx` an und ersetze den Platzhalter in `src/components/Checkout.jsx`. Der Request verwendet den Hook aus `API-02`.
+
+**Zusätzliche Theorie – `FormData`:** Ein HTML-Formular kann die Werte seiner benannten Eingabefelder selbst verwalten. `new FormData(form)` liest die aktuellen Werte aus; `Object.fromEntries(formData.entries())` wandelt sie in ein einfaches JavaScript-Objekt um. Dafür muss jedes Feld ein `name`-Attribut besitzen. Bei dieser Variante brauchst du nicht für jedes Eingabefeld einen eigenen React-State anzulegen. Die native Browserprüfung von `required` und `type="email"` ergänzt die serverseitige Validierung, ersetzt sie aber nicht.
+
+**`frontend/src/components/UI/Input.jsx` – vollständiger Inhalt**
+
+```jsx
+function Input({ label, id, ...props }) {
+  return (
+    <p className="control">
+      <label htmlFor={id}>{label}</label>
+      <input id={id} name={id} required {...props} />
+    </p>
+  );
+}
+
+export default Input;
+```
+
+**`frontend/src/components/Checkout.jsx` – vollständiger Inhalt**
+
+```jsx
+import { useActionState } from 'react';
+
+import Input from './UI/Input.jsx';
+import Button from './UI/Button';
+import Modal from './UI/Modal';
+import Error from './Error.jsx';
+import { useCart } from './../store/CartContext';
+import { useUserProgress } from './../store/UserProgessContext';
+import { formatPrice } from './../utils/formatting.js';
+import useHttp from '../hooks/useHttp.js';
+
+const requestConfig = {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+};
+
+export default function Checkout() {
+  const { data, error, sendRequest, clearData } = useHttp(
+    'http://localhost:3000/orders',
+    requestConfig
+  );
+  const { items, clearCart } = useCart();
+  const { progress, closeDialog } = useUserProgress();
+  const isOpen = progress === 'checkout';
+
+  const cartTotal = items.reduce(
+    (total, item) => total + Number(item.price) * item.quantity,
+    0
+  );
+  const orderSucceeded = Boolean(data) && !error;
+
+  async function checkoutAction(_prevState, formData) {
+    const customer = Object.fromEntries(formData.entries());
+    const order = { customer, items };
+    await sendRequest(JSON.stringify({ order }));
+    return null;
+  }
+
+  const [, formAction, isSending] = useActionState(checkoutAction, null);
+
+  function handleFinish() {
+    clearCart();
+    clearData();
+    closeDialog();
+  }
+
+  if (orderSucceeded) {
+    return (
+      <Modal
+        open={progress === 'checkout'}
+        onClose={handleFinish}
+        className="checkout"
+      >
+        <h2>Bestellung erfolgreich</h2>
+        <p>Vielen Dank für deine Bestellung.</p>
+        <div className="modal-actions">
+          <Button type="button" onClick={handleFinish}>
+            Fertig
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal className="checkout" open={isOpen} onClose={closeDialog}>
+      <h2>Checkout</h2>
+      <form action={formAction}>
+        <h2>Zur Kasse</h2>
+        <p>Gesamtbetrag: {formatPrice(cartTotal)}</p>
+
+        <Input label="Name" type="text" id="name" autoComplete="name" />
+        <Input
+          label="E-Mail-Adresse"
+          type="email"
+          id="email"
+          autoComplete="email"
+        />
+        <Input
+          label="Straße"
+          type="text"
+          id="street"
+          autoComplete="street-address"
+        />
+        <div className="control-row">
+          <Input
+            label="Postleitzahl"
+            type="text"
+            id="postal-code"
+            autoComplete="postal-code"
+          />
+          <Input
+            label="Ort"
+            type="text"
+            id="city"
+            autoComplete="address-level2"
+          />
+        </div>
+
+        {error && (
+          <Error title="Bestellung fehlgeschlagen" message={error} />
+        )}
+
+        <div className="modal-actions">
+          <Button type="button" textOnly onClick={closeDialog}>
+            Abbrechen
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSending || items.length === 0}
+          >
+            {isSending ? 'Bestellung wird gesendet...' : 'Bestellung absenden'}
           </Button>
         </div>
       </form>
