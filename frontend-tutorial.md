@@ -730,7 +730,7 @@ function AccessoryItem({ accessory }) {
         <img src={accessory.image} alt={accessory.name} />
         <h3>{accessory.name}</h3>
         <p className="accessory-item-description">{accessory.description}</p>
-        <p>{accessory.price}</p>
+        <p className="accessory-item-price">{accessory.price}</p>
       </article>
     </li>
   );
@@ -1152,7 +1152,7 @@ function AccessoryItem({ accessory }) {
         <img src={imageUrl} alt={accessory.name} />
         <h3>{accessory.name}</h3>
         <p className="accessory-item-description">{accessory.description}</p>
-        <p>{formatPrice(accessory.price)}</p>
+        <p className="accessory-item-price">{formatPrice(accessory.price)}</p>
         <p className="accessory-item-actions">
           <Button type="button" onClick={() => addItem(accessory)}>
             In den Warenkorb
@@ -2647,7 +2647,7 @@ function AccessoryItem({ accessory }) {
         <img src={imageUrl} alt={accessory.name} />
         <h3>{accessory.name}</h3>
         <p className="accessory-item-description">{accessory.description}</p>
-        <p>{formatPrice(accessory.price)}</p>
+        <p className="accessory-item-price">{formatPrice(accessory.price)}</p>
         <p className="accessory-item-actions">
           <Button type="button" onClick={() => addItem(accessory)}>
             In den Warenkorb
@@ -2843,7 +2843,7 @@ function AccessoryItem({ accessory }) {
         <img src={imageUrl} alt={accessory.name} />
         <h3>{accessory.name}</h3>
         <p className="accessory-item-description">{accessory.description}</p>
-        <p>{formatPrice(accessory.price)}</p>
+        <p className="accessory-item-price">{formatPrice(accessory.price)}</p>
         <p className="accessory-item-actions">
           <Button type="button" onClick={() => addItem(accessory)}>
             In den Warenkorb

@@ -96,7 +96,7 @@ h1 {
 
 .accessory-item-price {
   display: inline-block;
-  background-color: #312c1d;
+  /* background-color: #312c1d; */
   color: #00ffae;
   font-size: 0.9rem;
   font-weight: bold;
