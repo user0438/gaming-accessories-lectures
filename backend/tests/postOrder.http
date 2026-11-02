@@ -1,0 +1,25 @@
+POST /orders HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+    "order" : {
+        "customer": {
+            "name":"Max Mustermann",
+            "email":"max.mustermann@hak-bregenz.at",
+            "street":"Hinterfeldgasse 19",
+            "postal-code":"6900",
+            "city":"Bregenz"
+        },
+        "items": [
+            {
+                "id":"g2",
+                "name":"Mechanical Keyboard",
+                "price":"89.99",
+                "description":"Mechanical keyboard with blue switches, RGB backlight, and detachable wrist rest.",
+                "image":"images/mechanical-keyboard.png",
+                "quantity":6
+            }
+        ]
+    }
+}
